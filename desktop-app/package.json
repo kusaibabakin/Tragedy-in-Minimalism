@@ -1,0 +1,43 @@
+{
+  "name": "tragedy-in-minimalism-app",
+  "version": "1.0.0",
+  "description": "Desktop app for interactive clip Tragedy in Minimalism",
+  "main": "src/main/main.js",
+  "author": "deercries",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "sync-content": "node ./tools/sync-content.js",
+    "dev": "npm run sync-content && electron .",
+    "build": "npm run sync-content && electron-builder --dir",
+    "dist": "npm run sync-content && electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.deercries.tragedyminimalism",
+    "productName": "Tragedy in Minimalism",
+    "files": [
+      "src/**/*",
+      "content/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "mac": {
+      "target": [
+        "dir",
+        "dmg"
+      ],
+      "category": "public.app-category.entertainment"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  }
+}

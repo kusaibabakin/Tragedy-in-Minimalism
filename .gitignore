@@ -1,0 +1,7 @@
+.DS_Store
+desktop-app/dist/
+desktop-app/node_modules/
+videos/
+desktop-app/content/videos/
+site/.DS_Store
+videos/.DS_Store

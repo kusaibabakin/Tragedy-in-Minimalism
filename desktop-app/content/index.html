@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tragedy in Minimalism</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main id="app" class="app">
+    <audio id="backgroundMusic" class="background-music" preload="auto" src="./audio/tragedyminimalism.mp3"></audio>
+    <section id="stage" class="stage" aria-live="polite">
+      <a class="open-editor" href="./editor.html" aria-hidden="true" tabindex="-1">Open Graph Editor</a>
+      <div class="layer is-active" data-layer="A">
+        <video class="video" preload="auto" playsinline></video>
+        <div class="missing" aria-hidden="true">
+          <h2 class="missing-title"></h2>
+          <p class="missing-note"></p>
+        </div>
+      </div>
+
+      <div class="layer" data-layer="B">
+        <video class="video" preload="auto" playsinline></video>
+        <div class="missing" aria-hidden="true">
+          <h2 class="missing-title"></h2>
+          <p class="missing-note"></p>
+        </div>
+      </div>
+
+      <div id="debugOverlay" class="debug" hidden></div>
+
+      <div id="choicePanel" class="choice-panel" aria-hidden="true">
+        <p id="choiceHint" class="choice-hint"></p>
+        <div class="choice-buttons">
+          <button id="leftBtn" type="button" class="choice-btn">Left</button>
+          <button id="rightBtn" type="button" class="choice-btn">Right</button>
+        </div>
+        <p id="inputHint" class="input-hint"></p>
+      </div>
+
+      <div id="activationScreen" class="activation-screen" hidden>
+        <video
+          id="activationBackdropVideo"
+          class="activation-backdrop-video"
+          preload="auto"
+          autoplay
+          muted
+          loop
+          playsinline
+          aria-hidden="true"
+        >
+          <source src="./videos/zastavka.mp4" type="video/mp4" />
+        </video>
+        <div class="activation-card">
+          <p class="activation-kicker">Tragedy in Minimalism</p>
+          <h1 class="activation-title">Активация трансляции</h1>
+          <button id="activationBtn" type="button" class="activation-btn">ВКЛЮЧИТЬ ТРАНСЛЯЦИЮ</button>
+        </div>
+      </div>
+
+      <div id="creatorGate" class="creator-gate" hidden>
+        <div class="creator-card" role="dialog" aria-modal="true" aria-labelledby="creatorGateTitle">
+          <h2 id="creatorGateTitle">Creator Mode</h2>
+          <p class="creator-copy">Введите пароль, чтобы открыть редактор.</p>
+          <input id="creatorPasswordInput" class="creator-input" type="password" placeholder="Пароль" autocomplete="current-password" />
+          <p id="creatorGateError" class="creator-error" hidden>Неверный пароль</p>
+          <div class="creator-actions">
+            <button id="creatorCancelBtn" type="button" class="creator-btn creator-btn-secondary">Отмена</button>
+            <button id="creatorSubmitBtn" type="button" class="creator-btn">Открыть редактор</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

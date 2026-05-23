@@ -1,0 +1,724 @@
+(() => {
+  "use strict";
+
+  const state = {
+    story: null,
+    currentId: null,
+    previousId: null,
+    activeLayerKey: "A",
+    choiceEnabled: false,
+    sceneEnded: false,
+    pendingChoice: null,
+    debugEnabled: true,
+    transitionLock: false,
+    musicUnlocked: false,
+    musicStarted: false
+  };
+
+  const CREATOR_PASSWORD = "deercries";
+  const CREATOR_SHORTCUT_ENABLED = true;
+
+  const stage = document.getElementById("stage");
+  const backgroundMusic = document.getElementById("backgroundMusic");
+  const choicePanel = document.getElementById("choicePanel");
+  const choiceHint = document.getElementById("choiceHint");
+  const leftBtn = document.getElementById("leftBtn");
+  const rightBtn = document.getElementById("rightBtn");
+  const inputHint = document.getElementById("inputHint");
+  const debugOverlay = document.getElementById("debugOverlay");
+  const activationScreen = document.getElementById("activationScreen");
+  const activationBackdropVideo = document.getElementById("activationBackdropVideo");
+  const activationBtn = document.getElementById("activationBtn");
+  const creatorGate = document.getElementById("creatorGate");
+  const creatorPasswordInput = document.getElementById("creatorPasswordInput");
+  const creatorGateError = document.getElementById("creatorGateError");
+  const creatorSubmitBtn = document.getElementById("creatorSubmitBtn");
+  const creatorCancelBtn = document.getElementById("creatorCancelBtn");
+
+  const layerA = createLayerRef("A");
+  const layerB = createLayerRef("B");
+
+  if (backgroundMusic) {
+    backgroundMusic.addEventListener("timeupdate", applyMusicEnvelope);
+    backgroundMusic.addEventListener("ended", () => {
+      const music = musicSettings();
+      backgroundMusic.currentTime = Number(music.startAtSec || 0);
+      applyMusicEnvelope();
+      backgroundMusic.play().catch(() => {});
+    });
+  }
+
+  function createLayerRef(key) {
+    const root = stage.querySelector(`.layer[data-layer="${key}"]`);
+    return {
+      key,
+      root,
+      video: root.querySelector(".video"),
+      missing: root.querySelector(".missing"),
+      missingTitle: root.querySelector(".missing-title"),
+      missingNote: root.querySelector(".missing-note"),
+      revealHandled: false,
+      endTimerId: 0,
+      guardId: 0,
+      sceneId: ""
+    };
+  }
+
+  function activeLayer() {
+    return state.activeLayerKey === "A" ? layerA : layerB;
+  }
+
+  function inactiveLayer() {
+    return state.activeLayerKey === "A" ? layerB : layerA;
+  }
+
+  function settings() {
+    return state.story?.settings || {};
+  }
+
+  function normalizedVideoBaseUrl() {
+    const raw = String(settings().videoBaseUrl || "").trim();
+    if (!raw) return "";
+    return raw.endsWith("/") ? raw : `${raw}/`;
+  }
+
+  function sceneById(id) {
+    return state.story?.scenes?.[id] || null;
+  }
+
+  function musicSettings() {
+    const raw = state.story?.settings?.music;
+    return {
+      file: "tragedyminimalism.mp3",
+      startSceneId: "S2",
+      startAtSec: 0,
+      fadeInSec: 0,
+      fadeOutStartSec: 0,
+      fadeOutDurationSec: 0,
+      volume: 1,
+      ...(raw && typeof raw === "object" ? raw : {})
+    };
+  }
+
+  function ensureBackgroundMusicSource() {
+    if (!backgroundMusic) return;
+    const file = musicSettings().file || "tragedyminimalism.mp3";
+    const expected = new URL(`./audio/${file}`, window.location.href).href;
+    if (backgroundMusic.src !== expected) {
+      backgroundMusic.src = expected;
+      backgroundMusic.load();
+    }
+  }
+
+  function effectiveSceneById(id) {
+    const scene = sceneById(id);
+    if (!scene) return null;
+    if (id !== "F0") return scene;
+
+    const citizenVariant = scene.variants?.citizen;
+    const isCitizenPath = state.previousId === "C9" || state.previousId === "C10";
+    if (isCitizenPath && citizenVariant) {
+      return {
+        ...scene,
+        ...citizenVariant
+      };
+    }
+
+    return scene;
+  }
+
+  function videoPathFor(sceneId) {
+    const scene = sceneById(sceneId);
+    const file = scene?.video || `${sceneId}.mp4`;
+    const baseUrl = normalizedVideoBaseUrl();
+    return baseUrl ? `${baseUrl}${file}` : `videos/${file}`;
+  }
+
+  function log(event, payload = {}) {
+    const stamp = new Date().toISOString();
+    const data = { t: stamp, event, ...payload };
+    console.log("[TragedyInMinimalism]", data);
+    updateDebugOverlay(data);
+  }
+
+  function updateDebugOverlay(entry) {
+    if (!state.debugEnabled) return;
+    const lines = [
+      `scene: ${state.currentId || "-"}`,
+      `activeLayer: ${state.activeLayerKey}`,
+      `choiceEnabled: ${state.choiceEnabled}`,
+      `pendingChoice: ${state.pendingChoice || "-"}`,
+      `event: ${entry.event}`
+    ];
+    if (entry.from || entry.to) {
+      lines.push(`transition: ${entry.from || "-"} -> ${entry.to || "-"}`);
+    }
+    if (entry.reason) lines.push(`reason: ${entry.reason}`);
+    debugOverlay.textContent = lines.join("\n");
+  }
+
+  function showDebug(flag) {
+    state.debugEnabled = flag;
+    debugOverlay.hidden = !flag;
+    log("debug-toggle", { reason: flag ? "on" : "off" });
+  }
+
+  function clearTimers(layer) {
+    layer.video.ontimeupdate = null;
+    layer.revealHandled = false;
+    if (layer.endTimerId) {
+      clearTimeout(layer.endTimerId);
+      layer.endTimerId = 0;
+    }
+    if (layer.guardId) {
+      clearTimeout(layer.guardId);
+      layer.guardId = 0;
+    }
+  }
+
+  function resetVideoElement(video) {
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+    video.currentTime = 0;
+  }
+
+  function setMissingMode(layer, enabled, sceneId, details = {}) {
+    layer.root.classList.toggle("is-missing", enabled);
+    if (!enabled) {
+      layer.missingTitle.textContent = "";
+      layer.missingNote.textContent = "";
+      return;
+    }
+
+    const scene = sceneById(sceneId);
+    const title = scene?.title ? `${sceneId} - ${scene.title}` : (sceneId || "Unknown scene");
+    const lines = ["Video failed to load."];
+    if (details.src) lines.push(`file: ${details.src}`);
+    if (details.reason) lines.push(`reason: ${details.reason}`);
+
+    layer.missingTitle.textContent = title;
+    layer.missingNote.textContent = lines.join("\n");
+  }
+
+  function setChoiceState(enabled) {
+    state.choiceEnabled = enabled;
+    choicePanel.classList.toggle("is-active", enabled);
+    choicePanel.setAttribute("aria-hidden", enabled ? "false" : "true");
+
+    const scene = effectiveSceneById(state.currentId);
+    const leftTarget = scene?.left || "";
+    const rightTarget = scene?.right || "";
+    const leftLabel = scene?.leftLabel || "";
+    const rightLabel = scene?.rightLabel || "";
+    leftBtn.disabled = !enabled || !leftTarget;
+    rightBtn.disabled = !enabled || !rightTarget;
+    rightBtn.hidden = !rightTarget;
+
+    leftBtn.classList.toggle("is-selected", state.pendingChoice === "left");
+    rightBtn.classList.toggle("is-selected", state.pendingChoice === "right");
+
+    if (enabled) {
+      choiceHint.textContent = "";
+      inputHint.textContent = "";
+      leftBtn.textContent = leftLabel || (leftTarget ? `Left (${leftTarget})` : "Left");
+      rightBtn.textContent = rightLabel || (rightTarget ? `Right (${rightTarget})` : "Right");
+    } else {
+      choiceHint.textContent = "";
+      inputHint.textContent = "";
+      leftBtn.textContent = "Left";
+      rightBtn.textContent = "Right";
+    }
+  }
+
+  function setActivationState(enabled, scene) {
+    activationScreen.hidden = !enabled;
+    if (activationBackdropVideo) {
+      if (enabled) {
+        activationBackdropVideo.currentTime = 0;
+        activationBackdropVideo.play().catch(() => {});
+      } else {
+        activationBackdropVideo.pause();
+        activationBackdropVideo.currentTime = 0;
+      }
+    }
+    if (!enabled) return;
+    activationBtn.textContent = scene?.leftLabel || "ВКЛЮЧИТЬ ТРАНСЛЯЦИЮ";
+  }
+
+  async function ensureBackgroundMusicPlaying() {
+    if (!backgroundMusic) return;
+    ensureBackgroundMusicSource();
+    if (!backgroundMusic.currentSrc && !backgroundMusic.src) return;
+    applyMusicEnvelope();
+    if (!backgroundMusic.paused) return;
+    try {
+      await backgroundMusic.play();
+      log("music-play", { track: "tragedyminimalism.mp3" });
+    } catch (err) {
+      log("music-play-failed", { reason: String(err?.message || err) });
+    }
+  }
+
+  function primeBackgroundMusicFromGesture() {
+    if (!backgroundMusic) return;
+    ensureBackgroundMusicSource();
+    if (!backgroundMusic.currentSrc && !backgroundMusic.src) return;
+    state.musicUnlocked = true;
+    const music = musicSettings();
+    backgroundMusic.currentTime = Number(music.startAtSec || 0);
+    backgroundMusic.volume = 0;
+    const playPromise = backgroundMusic.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise
+        .then(() => {
+          backgroundMusic.pause();
+          backgroundMusic.currentTime = Number(music.startAtSec || 0);
+          backgroundMusic.volume = 0;
+          log("music-primed", { track: "tragedyminimalism.mp3" });
+        })
+        .catch((err) => log("music-prime-failed", { reason: String(err?.message || err) }));
+    }
+  }
+
+  function syncBackgroundMusic(scene) {
+    if (!backgroundMusic) return;
+    ensureBackgroundMusicSource();
+    const music = musicSettings();
+    backgroundMusic.loop = false;
+    if (scene?.uiMode === "activation") {
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
+      state.musicStarted = false;
+      return;
+    }
+    const shouldStartNow = state.currentId === (music.startSceneId || "S2");
+    if (!state.musicStarted && shouldStartNow) {
+      state.musicStarted = true;
+      backgroundMusic.currentTime = Number(music.startAtSec || 0);
+    }
+    if (!state.musicStarted || !state.musicUnlocked) return;
+    ensureBackgroundMusicPlaying();
+  }
+
+  function applyMusicEnvelope() {
+    if (!backgroundMusic) return;
+    const music = musicSettings();
+    const currentTime = Number(backgroundMusic.currentTime || 0);
+    const baseVolume = Math.max(0, Math.min(1, Number(music.volume ?? 1)));
+    let volume = baseVolume;
+
+    const fadeInSec = Math.max(0, Number(music.fadeInSec || 0));
+    const startAtSec = Math.max(0, Number(music.startAtSec || 0));
+    const fadeOutStartSec = Math.max(0, Number(music.fadeOutStartSec || 0));
+    const fadeOutDurationSec = Math.max(0, Number(music.fadeOutDurationSec || 0));
+
+    if (fadeInSec > 0 && currentTime < startAtSec + fadeInSec) {
+      volume *= Math.max(0, (currentTime - startAtSec) / fadeInSec);
+    }
+
+    if (fadeOutDurationSec > 0 && fadeOutStartSec > 0 && currentTime >= fadeOutStartSec) {
+      const fadeOutProgress = 1 - ((currentTime - fadeOutStartSec) / fadeOutDurationSec);
+      volume *= Math.max(0, Math.min(1, fadeOutProgress));
+    }
+
+    backgroundMusic.volume = volume;
+  }
+
+  function chooseTarget(direction) {
+    const scene = effectiveSceneById(state.currentId);
+    if (!scene) return;
+    const isActivationScene = scene.uiMode === "activation";
+    if (!state.choiceEnabled && !isActivationScene) return;
+
+    const target = direction === "left" ? scene.left : scene.right;
+    const label = direction === "left" ? (scene.leftLabel || scene.left || "left") : (scene.rightLabel || scene.right || "right");
+    if (!target) {
+      log("choice-ignored", { reason: `no-${direction}-target` });
+      return;
+    }
+
+    state.pendingChoice = direction;
+    if (!isActivationScene) {
+      setChoiceState(false);
+    }
+    log("choice-picked", { direction, label, from: state.currentId, to: target });
+
+    // In regular scenes, a click only arms the branch. The actual transition
+    // happens when the current fragment finishes.
+    if (isActivationScene) {
+      gotoScene(target, `choice-${direction}`);
+      return;
+    }
+
+    // If the fragment has already finished by the time the choice is made,
+    // transition immediately because there is nothing left to play.
+    if (state.sceneEnded) {
+      gotoScene(target, `choice-${direction}`);
+    }
+  }
+
+  function randomChoiceDirection(scene) {
+    const available = [];
+    if (scene?.left) available.push("left");
+    if (scene?.right) available.push("right");
+    if (!available.length) return null;
+    return available[Math.floor(Math.random() * available.length)];
+  }
+
+  function activateLayer(layer, crossfadeMs) {
+    const prev = activeLayer();
+
+    prev.root.style.transitionDuration = `${crossfadeMs}ms`;
+    layer.root.style.transitionDuration = `${crossfadeMs}ms`;
+
+    layer.root.classList.add("is-active");
+    prev.root.classList.remove("is-active");
+
+    state.activeLayerKey = layer.key;
+
+    window.setTimeout(() => {
+      resetVideoElement(prev.video);
+      setMissingMode(prev, false);
+    }, Math.max(50, crossfadeMs + 20));
+  }
+
+  function handleSceneEnded(sceneId, reason) {
+    if (state.currentId !== sceneId) return;
+
+    const scene = effectiveSceneById(sceneId);
+    if (!scene) return;
+    state.sceneEnded = true;
+
+    log("scene-ended", { scene: sceneId, reason });
+
+    if (scene.left || scene.right) {
+      if (state.pendingChoice) {
+        const target = state.pendingChoice === "left" ? scene.left : scene.right;
+        if (target) {
+          gotoScene(target, `choice-${state.pendingChoice}`);
+          return;
+        }
+      }
+
+      const autoDirection = randomChoiceDirection(scene);
+      const autoTarget = autoDirection === "left" ? scene.left : scene.right;
+      if (autoDirection && autoTarget) {
+        log("choice-auto-picked", {
+          direction: autoDirection,
+          from: sceneId,
+          reason: "choice-time-expired",
+          to: autoTarget
+        });
+        gotoScene(autoTarget, `choice-timeout-${autoDirection}`);
+        return;
+      }
+
+      return;
+    }
+
+    if (scene.next) {
+      gotoScene(scene.next, "auto-next");
+      return;
+    }
+
+    log("story-idle", { scene: sceneId, reason: "terminal-scene" });
+  }
+
+  function revealChoicesForScene(sceneId, reason) {
+    if (state.currentId !== sceneId || state.sceneEnded) return;
+    const scene = effectiveSceneById(sceneId);
+    if (!scene || scene.uiMode === "activation") return;
+    if (!scene.left && !scene.right) return;
+    if (state.choiceEnabled) return;
+    setChoiceState(true);
+    log("choice-revealed", { scene: sceneId, reason });
+  }
+
+  function armEndedHandlers(layer, sceneId, isMissing) {
+    clearTimers(layer);
+
+    const finish = (reason) => handleSceneEnded(sceneId, reason);
+
+    layer.video.onended = () => finish("ended");
+    layer.video.onerror = () => {
+      if (state.currentId !== sceneId) return;
+      setMissingMode(layer, true, sceneId, {
+        src: videoPathFor(sceneId),
+        reason: "video element error"
+      });
+      finish("video-error");
+    };
+
+    if (isMissing) {
+      layer.endTimerId = window.setTimeout(
+        () => finish("missing-timeout"),
+        Math.max(0, Number(settings().missingHoldMs) || 0)
+      );
+      return;
+    }
+
+    layer.video.ontimeupdate = () => {
+      if (state.currentId !== sceneId || layer.revealHandled) return;
+      const duration = Number(layer.video.duration);
+      const currentTime = Number(layer.video.currentTime);
+      if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(currentTime)) return;
+      if (duration - currentTime <= 3) {
+        layer.revealHandled = true;
+        revealChoicesForScene(sceneId, "three-seconds-before-end");
+      }
+    };
+
+    layer.guardId = window.setTimeout(() => {
+      if (state.currentId !== sceneId) return;
+      if (layer.video.readyState === 0 || layer.video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+        setMissingMode(layer, true, sceneId, {
+          src: videoPathFor(sceneId),
+          reason: "watchdog: no media source"
+        });
+        finish("watchdog-no-source");
+      }
+    }, 1600);
+  }
+
+  async function startSceneOnLayer(layer, sceneId) {
+    const scene = sceneById(sceneId);
+    if (!scene) {
+      throw new Error(`Unknown scene id: ${sceneId}`);
+    }
+
+    if (scene.uiMode === "activation") {
+      clearTimers(layer);
+      setMissingMode(layer, false, sceneId);
+      resetVideoElement(layer.video);
+      layer.sceneId = sceneId;
+      return { missing: false, src: "" };
+    }
+
+    const src = videoPathFor(sceneId);
+
+    setMissingMode(layer, false, sceneId);
+    resetVideoElement(layer.video);
+    layer.sceneId = sceneId;
+    layer.video.src = src;
+    layer.video.load();
+
+    let missing = false;
+
+    try {
+      await layer.video.play();
+    } catch (err) {
+      missing = true;
+      setMissingMode(layer, true, sceneId, {
+        src,
+        reason: String(err?.message || err || "play() failed")
+      });
+    }
+
+    armEndedHandlers(layer, sceneId, missing);
+    return { missing, src };
+  }
+
+  async function gotoScene(targetId, reason) {
+    if (state.transitionLock) return;
+    state.transitionLock = true;
+
+    try {
+      const target = sceneById(targetId);
+      if (!target) {
+        log("transition-error", { reason: "unknown-target", to: targetId });
+        return;
+      }
+
+      const fromId = state.currentId;
+      state.previousId = fromId;
+      state.currentId = targetId;
+      state.sceneEnded = false;
+      state.pendingChoice = null;
+      const effectiveTarget = effectiveSceneById(targetId);
+      const instantChoice = effectiveTarget?.uiMode === "activation";
+      state.sceneEnded = Boolean(instantChoice);
+      setChoiceState(false);
+      setActivationState(Boolean(instantChoice), effectiveTarget);
+      syncBackgroundMusic(effectiveTarget);
+
+      const nextLayer = inactiveLayer();
+      const { missing } = await startSceneOnLayer(nextLayer, targetId);
+
+      const crossfadeMs = Math.max(0, Number(settings().crossfadeMs) || 0);
+      activateLayer(nextLayer, crossfadeMs);
+
+      log("transition", {
+        from: fromId,
+        to: targetId,
+        reason,
+        missing
+      });
+    } finally {
+      window.setTimeout(() => {
+        state.transitionLock = false;
+      }, Math.max(20, Number(settings().crossfadeMs) || 0));
+    }
+  }
+
+  async function bootstrap() {
+    const story = await loadStoryMap("./story.json");
+    validateStory(story);
+    state.story = story;
+    showDebug(false);
+    closeCreatorGate();
+
+    leftBtn.addEventListener("click", () => chooseTarget("left"));
+    rightBtn.addEventListener("click", () => chooseTarget("right"));
+    activationBtn.addEventListener("click", () => {
+      primeBackgroundMusicFromGesture();
+      chooseTarget("left");
+    });
+
+    document.addEventListener(
+      "click",
+      (evt) => {
+        if (!state.choiceEnabled) return;
+        if (evt.target.closest("#rightBtn")) return;
+        chooseTarget("left");
+      },
+      true
+    );
+
+    document.addEventListener(
+      "contextmenu",
+      (evt) => {
+        if (!state.choiceEnabled) return;
+        evt.preventDefault();
+        chooseTarget("right");
+      },
+      true
+    );
+
+    creatorSubmitBtn.addEventListener("click", submitCreatorPassword);
+    creatorCancelBtn.addEventListener("click", closeCreatorGate);
+    creatorPasswordInput.addEventListener("keydown", (evt) => {
+      if (evt.code === "Enter" || evt.code === "NumpadEnter") {
+        evt.preventDefault();
+        submitCreatorPassword();
+      }
+      if (evt.code === "Escape") {
+        evt.preventDefault();
+        closeCreatorGate();
+      }
+    });
+
+    const handleCreatorShortcut = (evt) => {
+      if (!isCreatorShortcut(evt) || evt.repeat) return;
+      evt.preventDefault();
+      evt.stopPropagation();
+      openCreatorGate();
+    };
+
+    window.addEventListener("keydown", handleCreatorShortcut, true);
+    document.addEventListener("keydown", handleCreatorShortcut, true);
+    window.addEventListener("tragedy:open-creator-gate", () => {
+      openCreatorGate();
+    });
+
+    await gotoScene(settings().start, "bootstrap");
+  }
+
+  function validateStory(story) {
+    if (!story || typeof story !== "object") {
+      throw new Error("story.json is empty or invalid.");
+    }
+    if (!story.scenes || typeof story.scenes !== "object") {
+      throw new Error("story.json: scenes object is missing.");
+    }
+    if (!story.settings || typeof story.settings !== "object") {
+      throw new Error("story.json: settings object is missing.");
+    }
+    if (!story.settings.start || !story.scenes[story.settings.start]) {
+      throw new Error("story.json: settings.start must reference existing scene id.");
+    }
+  }
+
+  function openCreatorGate() {
+    creatorGate.hidden = false;
+    creatorGateError.hidden = true;
+    creatorPasswordInput.value = "";
+    window.setTimeout(() => creatorPasswordInput.focus(), 0);
+  }
+
+  function closeCreatorGate() {
+    creatorGate.hidden = true;
+    creatorGateError.hidden = true;
+    creatorPasswordInput.value = "";
+  }
+
+  function isCreatorShortcut(evt) {
+    const shortcutPressed = evt.metaKey || evt.ctrlKey;
+    if (!CREATOR_SHORTCUT_ENABLED || !shortcutPressed || !evt.shiftKey) return false;
+    return evt.code === "KeyZ" || evt.key === "Z" || evt.key === "z" || evt.key === "Я" || evt.key === "я";
+  }
+
+  function submitCreatorPassword() {
+    if (creatorPasswordInput.value === CREATOR_PASSWORD) {
+      window.location.href = "./editor.html";
+      return;
+    }
+    creatorGateError.hidden = false;
+    creatorPasswordInput.select();
+    log("creator-mode-denied", { reason: "bad-password" });
+  }
+
+  async function loadStoryMap(url) {
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (fetchErr) {
+      log("story-fetch-failed", { reason: String(fetchErr.message || fetchErr) });
+      return await loadStoryMapViaIframe(url);
+    }
+  }
+
+  function loadStoryMapViaIframe(url) {
+    return new Promise((resolve, reject) => {
+      const frame = document.createElement("iframe");
+      frame.style.position = "absolute";
+      frame.style.width = "0";
+      frame.style.height = "0";
+      frame.style.opacity = "0";
+      frame.style.pointerEvents = "none";
+      frame.src = `${url}?_=${Date.now()}`;
+
+      const cleanup = () => {
+        frame.remove();
+      };
+
+      frame.onload = () => {
+        try {
+          const raw = frame.contentDocument?.body?.innerText?.trim();
+          if (!raw) throw new Error("iframe returned empty story content");
+          const parsed = JSON.parse(raw);
+          cleanup();
+          resolve(parsed);
+        } catch (err) {
+          cleanup();
+          reject(err);
+        }
+      };
+
+      frame.onerror = () => {
+        cleanup();
+        reject(new Error("iframe story load failed"));
+      };
+
+      document.body.appendChild(frame);
+    });
+  }
+
+  bootstrap().catch((err) => {
+    console.error("[TragedyInMinimalism] bootstrap failed", err);
+    choicePanel.classList.remove("is-active");
+    debugOverlay.hidden = false;
+    debugOverlay.textContent = `Bootstrap failed:\n${String(err.message || err)}`;
+  });
+})();

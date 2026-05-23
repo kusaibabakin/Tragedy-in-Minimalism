@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tragedy Graph Editor</title>
+  <link rel="stylesheet" href="./editor.css" />
+</head>
+<body>
+  <main class="editor-app">
+    <aside class="panel">
+      <h1>Story Graph</h1>
+
+      <section class="group">
+        <h2>Project</h2>
+        <label class="field">
+          <span>Title</span>
+          <input id="titleInput" type="text" />
+        </label>
+        <label class="field">
+          <span>Start</span>
+          <select id="startSelect"></select>
+        </label>
+        <label class="field row">
+          <span>Crossfade (ms)</span>
+          <input id="crossfadeInput" type="number" min="0" step="10" />
+        </label>
+      </section>
+
+      <section class="group">
+        <h2>Scene</h2>
+        <div id="sceneMeta" class="meta">No scene selected</div>
+        <label class="field">
+          <span>Left target</span>
+          <select id="leftSelect"></select>
+        </label>
+        <label class="field">
+          <span>Right target</span>
+          <select id="rightSelect"></select>
+        </label>
+        <label class="field">
+          <span>Auto next</span>
+          <select id="nextSelect"></select>
+        </label>
+      </section>
+
+      <section class="group actions">
+        <button id="openPlayerBtn" type="button">Open Player</button>
+        <button id="addSceneBtn" type="button">Add scene</button>
+        <button id="deleteSceneBtn" type="button" class="danger">Delete scene</button>
+        <button id="autoLayoutBtn" type="button">Auto layout</button>
+        <button id="saveBtn" type="button" class="primary">Save project</button>
+      </section>
+
+      <section class="group">
+        <h2>History</h2>
+        <div class="arrow-pad">
+          <div class="arrow-row">
+            <button id="undoBtn" type="button" class="arrow-btn">←</button>
+            <button id="redoBtn" type="button" class="arrow-btn">→</button>
+          </div>
+        </div>
+      </section>
+
+      <p class="hint">Drag nodes on canvas. Wheel = zoom. Drag the circle at the end of an edge to reconnect or detach it. In the desktop editor you can drop a video file onto a node to attach or replace it automatically. In the browser version, Save project writes back to the chosen project folder when the browser supports local file access. Press <code>D</code> in player for debug overlay.</p>
+      <p id="status" class="status"></p>
+    </aside>
+
+    <section class="canvas-wrap">
+      <svg id="graphSvg" class="graph" viewBox="0 0 4600 1400" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,4 L0,8 z" />
+          </marker>
+        </defs>
+        <g id="edgesLayer"></g>
+        <g id="nodesLayer"></g>
+      </svg>
+      <section class="timeline-dock">
+        <div class="timeline-dock-head">
+          <h2>Music Timeline</h2>
+          <div id="musicDuration" class="meta">--:--</div>
+        </div>
+        <audio id="editorMusicPreview" preload="metadata" src="./audio/tragedyminimalism.mp3"></audio>
+        <div class="music-toolbar">
+          <button id="musicPreviewBtn" type="button">Play / Pause</button>
+          <div id="musicTimelineMeta" class="meta">00:00</div>
+        </div>
+        <input id="musicTimeline" class="music-timeline" type="range" min="0" max="100" step="0.1" value="0" />
+        <div class="timeline-fields">
+          <label class="field row">
+            <span>Start scene</span>
+            <input id="musicStartSceneInput" type="text" />
+          </label>
+          <label class="field row">
+            <span>Start at (sec)</span>
+            <input id="musicStartInput" type="number" min="0" step="0.1" />
+          </label>
+          <label class="field row">
+            <span>Fade in (sec)</span>
+            <input id="musicFadeInInput" type="number" min="0" step="0.1" />
+          </label>
+          <label class="field row">
+            <span>Fade out start (sec)</span>
+            <input id="musicFadeOutStartInput" type="number" min="0" step="0.1" />
+          </label>
+          <label class="field row">
+            <span>Fade out duration (sec)</span>
+            <input id="musicFadeOutDurationInput" type="number" min="0" step="0.1" />
+          </label>
+          <label class="field row">
+            <span>Volume</span>
+            <input id="musicVolumeInput" type="range" min="0" max="100" step="1" />
+          </label>
+          <div id="musicVolumeMeta" class="meta">100%</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="sceneCreateModal" class="scene-modal" hidden>
+    <div class="scene-modal-card" role="dialog" aria-modal="true" aria-labelledby="sceneCreateTitle">
+      <h2 id="sceneCreateTitle">New Scene</h2>
+      <p class="scene-modal-copy">Enter a unique scene id.</p>
+      <input id="sceneCreateInput" class="scene-modal-input" type="text" placeholder="s_new" />
+      <p id="sceneCreateError" class="scene-modal-error" hidden>Scene id is invalid or already exists.</p>
+      <div class="scene-modal-actions">
+        <button id="sceneCreateCancelBtn" type="button">Cancel</button>
+        <button id="sceneCreateSubmitBtn" type="button" class="primary">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./editor.js" defer></script>
+</body>
+</html>
