@@ -110,6 +110,21 @@
     }
   }
 
+  function activationBackdropPath() {
+    const file = String(settings().activationVideo || "zastavka.mp4").trim() || "zastavka.mp4";
+    const baseUrl = normalizedVideoBaseUrl();
+    return baseUrl ? `${baseUrl}${file}` : `videos/${file}`;
+  }
+
+  function ensureActivationBackdropSource() {
+    if (!activationBackdropVideo) return;
+    const expected = new URL(activationBackdropPath(), window.location.href).href;
+    if (activationBackdropVideo.src !== expected) {
+      activationBackdropVideo.src = expected;
+      activationBackdropVideo.load();
+    }
+  }
+
   function effectiveSceneById(id) {
     const scene = sceneById(id);
     if (!scene) return null;
@@ -234,6 +249,7 @@
   function setActivationState(enabled, scene) {
     activationScreen.hidden = !enabled;
     if (activationBackdropVideo) {
+      ensureActivationBackdropSource();
       if (enabled) {
         activationBackdropVideo.currentTime = 0;
         activationBackdropVideo.play().catch(() => {});
@@ -565,6 +581,7 @@
     const story = await loadStoryMap("./story.json");
     validateStory(story);
     state.story = story;
+    ensureActivationBackdropSource();
     showDebug(false);
     closeCreatorGate();
 
