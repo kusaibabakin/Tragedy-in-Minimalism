@@ -155,6 +155,7 @@
 ### N8 - Пара в газете
 - Type: ending
 - Video: N8.mp4
+- Auto next: prefinal routing by choice balance
 - Notes: поцелуй///переход через телевизор в студии
 
 ### S_NEW_28
@@ -393,14 +394,15 @@
 - D7 (Ядерный гриб): остаться -> D8 | сделать фото -> S_NEW_28 | AUTO -> D7
 - D8 (бабушки в телефонах): AUTO -> N6
 - N6 (Человек тащит мусор): копить мусор -> D9 | сортировка мусора -> N8
-- D9 (бабушки на проводах): AUTO -> F0
+- D9 (бабушки на проводах): AUTO -> prefinal routing by choice balance
 - F0 (Финальная студия): бездействовать  -> F1 | сомневаться -> F2
 - S_NEW_28: AUTO -> N10
 - N10 (селфи  на фоне ядерного гриба): сохранить фото -> S_NEW_16 | удалить -> S_NEW_19
 - S_NEW_16: AUTO -> N6
 - S_NEW_19: AUTO -> C11
 - C11 (летящие бабушки): прочитать -> N8 | игнорировать -> C10
-- C10 (Горящая газета): AUTO -> S_NEW_2
+- C10 (Горящая газета): AUTO -> prefinal routing by choice balance
+- N8 (Пара в газете): AUTO -> prefinal routing by choice balance
 - S_NEW_2 (финальная студия-ведущий): продолжить просмотр -> F2 | выключить -> F3
 - S_NEW_11: AUTO -> S_NEW_24
 - S_NEW_24: AUTO -> N5
@@ -447,4 +449,3 @@
 - Expand scene notes into action, image, and dialogue.
 - Use the branch summary to separate alternative scene versions.
 - Use the endings list as targets for full linear screenplay drafts.
-

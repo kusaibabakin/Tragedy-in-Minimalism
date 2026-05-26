@@ -97,6 +97,10 @@
     return state.story?.scenes?.[id] || null;
   }
 
+  function normalizeLabel(value) {
+    return String(value || "").trim();
+  }
+
   function musicSettings() {
     const raw = state.story?.settings?.music;
     return {
@@ -336,8 +340,8 @@
     const scene = effectiveSceneById(state.currentId);
     const leftTarget = scene?.left || "";
     const rightTarget = scene?.right || "";
-    const leftLabel = scene?.leftLabel || "";
-    const rightLabel = scene?.rightLabel || "";
+    const leftLabel = normalizeLabel(scene?.leftLabel);
+    const rightLabel = normalizeLabel(scene?.rightLabel);
     leftBtn.disabled = !enabled || !leftTarget;
     rightBtn.disabled = !enabled || !rightTarget;
     rightBtn.hidden = !rightTarget;
@@ -371,7 +375,7 @@
       }
     }
     if (!enabled) return;
-    const activationLabel = scene?.leftLabel || "ВКЛЮЧИТЬ ТРАНСЛЯЦИЮ";
+    const activationLabel = normalizeLabel(scene?.leftLabel) || "ВКЛЮЧИТЬ ТРАНСЛЯЦИЮ";
     activationBtn.setAttribute("aria-label", activationLabel);
     activationBtn.title = activationLabel;
     if (activationBtnLabel) {
@@ -485,7 +489,9 @@
     if (!state.choiceEnabled && !isActivationScene) return;
 
     const target = direction === "left" ? scene.left : scene.right;
-    const label = direction === "left" ? (scene.leftLabel || scene.left || "left") : (scene.rightLabel || scene.right || "right");
+    const label = direction === "left"
+      ? (normalizeLabel(scene.leftLabel) || scene.left || "left")
+      : (normalizeLabel(scene.rightLabel) || scene.right || "right");
     if (!target) {
       log("choice-ignored", { reason: `no-${direction}-target` });
       return;

@@ -13,7 +13,6 @@ const siteFiles = [
 ];
 
 const siteDirs = [
-  "audio",
   "fonts",
   "assets"
 ];
@@ -50,6 +49,39 @@ function writeSiteStory(config) {
   }
 
   fs.writeFileSync(path.join(out, "story.json"), `${JSON.stringify(story, null, 2)}\n`, "utf8");
+}
+
+function loadRootStory() {
+  return JSON.parse(fs.readFileSync(path.join(root, "story.json"), "utf8"));
+}
+
+function collectUsedAudioFiles(story) {
+  const used = new Set();
+  const music = story?.settings?.music;
+  if (music?.file) {
+    used.add(String(music.file).trim());
+  }
+  const cues = Array.isArray(music?.cues) ? music.cues : [];
+  for (const cue of cues) {
+    if (!cue?.file) continue;
+    used.add(String(cue.file).trim());
+  }
+  return [...used].filter(Boolean).sort();
+}
+
+function copyUsedAudio(story) {
+  const srcDir = path.join(root, "audio");
+  const dstDir = path.join(out, "audio");
+  ensureDir(dstDir);
+  if (!fs.existsSync(srcDir)) return;
+
+  for (const fileName of collectUsedAudioFiles(story)) {
+    const src = path.join(srcDir, fileName);
+    if (!fs.existsSync(src)) {
+      throw new Error(`Missing audio file referenced by story.json: ${src}`);
+    }
+    copyFile(src, path.join(dstDir, fileName));
+  }
 }
 
 function ensureDir(dir) {
@@ -91,6 +123,7 @@ function writeNoJekyllFile() {
 
 function run() {
   const config = loadSiteConfig();
+  const story = loadRootStory();
   ensureDir(out);
   emptyDir(out);
 
@@ -103,6 +136,7 @@ function run() {
   }
 
   writeSiteStory(config);
+  copyUsedAudio(story);
 
   for (const dirName of siteDirs) {
     const srcDir = path.join(root, dirName);
