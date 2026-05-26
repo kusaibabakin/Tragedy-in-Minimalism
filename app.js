@@ -12,7 +12,13 @@
     debugEnabled: true,
     transitionLock: false,
     musicUnlocked: false,
-    musicStarted: false
+    musicStarted: false,
+    activeMusic: null,
+    choiceStats: {
+      dictator: 0,
+      citizen: 0,
+      neutral: 0
+    }
   };
 
   const CREATOR_PASSWORD = "deercries";
@@ -41,7 +47,11 @@
   if (backgroundMusic) {
     backgroundMusic.addEventListener("timeupdate", applyMusicEnvelope);
     backgroundMusic.addEventListener("ended", () => {
-      const music = musicSettings();
+      const music = activeMusicConfig();
+      if (music.loop === false) {
+        state.musicStarted = false;
+        return;
+      }
       backgroundMusic.currentTime = Number(music.startAtSec || 0);
       applyMusicEnvelope();
       backgroundMusic.play().catch(() => {});
@@ -96,14 +106,44 @@
       fadeOutStartSec: 0,
       fadeOutDurationSec: 0,
       volume: 1,
+      cues: [],
       ...(raw && typeof raw === "object" ? raw : {})
     };
   }
 
-  function ensureBackgroundMusicSource() {
+  function normalizeMusicCue(rawCue, fallback = {}) {
+    return {
+      file: String(rawCue?.file || fallback.file || "tragedyminimalism.mp3").trim() || "tragedyminimalism.mp3",
+      startSceneId: String(rawCue?.startSceneId || fallback.startSceneId || "").trim(),
+      startAtSec: Number(rawCue?.startAtSec ?? fallback.startAtSec ?? 0) || 0,
+      fadeInSec: Number(rawCue?.fadeInSec ?? fallback.fadeInSec ?? 0) || 0,
+      fadeOutStartSec: Number(rawCue?.fadeOutStartSec ?? fallback.fadeOutStartSec ?? 0) || 0,
+      fadeOutDurationSec: Number(rawCue?.fadeOutDurationSec ?? fallback.fadeOutDurationSec ?? 0) || 0,
+      volume: Number(rawCue?.volume ?? fallback.volume ?? 1),
+      loop: rawCue?.loop ?? fallback.loop ?? true
+    };
+  }
+
+  function defaultMusicCue() {
+    return normalizeMusicCue(musicSettings());
+  }
+
+  function musicCueForScene(sceneId) {
+    const music = musicSettings();
+    const fallback = defaultMusicCue();
+    const cues = Array.isArray(music.cues) ? music.cues : [];
+    const matched = cues.find((cue) => String(cue?.startSceneId || "").trim() === sceneId);
+    return matched ? normalizeMusicCue(matched, fallback) : null;
+  }
+
+  function activeMusicConfig() {
+    return state.activeMusic || defaultMusicCue();
+  }
+
+  function ensureBackgroundMusicSource(file) {
     if (!backgroundMusic) return;
-    const file = musicSettings().file || "tragedyminimalism.mp3";
-    const expected = new URL(`./audio/${file}`, window.location.href).href;
+    const expectedFile = String(file || defaultMusicCue().file || "tragedyminimalism.mp3").trim() || "tragedyminimalism.mp3";
+    const expected = new URL(`./audio/${expectedFile}`, window.location.href).href;
     if (backgroundMusic.src !== expected) {
       backgroundMusic.src = expected;
       backgroundMusic.load();
@@ -128,18 +168,89 @@
   function effectiveSceneById(id) {
     const scene = sceneById(id);
     if (!scene) return null;
-    if (id !== "F0") return scene;
-
-    const citizenVariant = scene.variants?.citizen;
-    const isCitizenPath = state.previousId === "C9" || state.previousId === "C10";
-    if (isCitizenPath && citizenVariant) {
-      return {
-        ...scene,
-        ...citizenVariant
-      };
-    }
-
     return scene;
+  }
+
+  function classifySceneLine(sceneId) {
+    if (!sceneId) return null;
+
+    if (sceneId.startsWith("D")) return "dictator";
+    if (sceneId.startsWith("C")) return "citizen";
+    if (sceneId.startsWith("N")) return "neutral";
+
+    const bridgeLineMap = {
+      S_NEW_1: "dictator",
+      S_NEW_2: "citizen",
+      S_NEW_3: "citizen",
+      S_NEW_4: "citizen",
+      S_NEW_5: "citizen",
+      S_NEW_6: "citizen",
+      S_NEW_7: "dictator",
+      S_NEW_8: "neutral",
+      S_NEW_9: "neutral",
+      S_NEW_10: "citizen",
+      S_NEW_11: "dictator",
+      S_NEW_12: "citizen",
+      S_NEW_13: "dictator",
+      S_NEW_14: "citizen",
+      S_NEW_15: "neutral",
+      S_NEW_16: "neutral",
+      S_NEW_17: "citizen",
+      S_NEW_18: "dictator",
+      S_NEW_19: "citizen",
+      S_NEW_20: "neutral",
+      S_NEW_21: "citizen",
+      S_NEW_22: "citizen",
+      S_NEW_23: "dictator",
+      S_NEW_24: "neutral",
+      S_NEW_25: null,
+      S_NEW_26: null,
+      S_NEW_27: null,
+      S_NEW_28: "neutral"
+    };
+
+    return bridgeLineMap[sceneId] ?? null;
+  }
+
+  function trackChoiceTarget(targetId) {
+    const line = classifySceneLine(targetId);
+    if (!line) return;
+    state.choiceStats[line] += 1;
+    log("choice-line-tracked", {
+      target: targetId,
+      line,
+      dictator: state.choiceStats.dictator,
+      citizen: state.choiceStats.citizen,
+      neutral: state.choiceStats.neutral
+    });
+  }
+
+  function finalHubForChoiceBalance() {
+    const dictator = Number(state.choiceStats.dictator || 0);
+    const citizen = Number(state.choiceStats.citizen || 0);
+    const neutral = Number(state.choiceStats.neutral || 0);
+    const classifiedTotal = dictator + citizen + neutral;
+    const polarityTotal = dictator + citizen;
+    const dictatorPercent = polarityTotal > 0 ? (dictator / polarityTotal) * 100 : 50;
+    const citizenPercent = polarityTotal > 0 ? (citizen / polarityTotal) * 100 : 50;
+    const hub = citizenPercent > dictatorPercent ? "S_NEW_2" : "F0";
+
+    log("final-hub-selected", {
+      hub,
+      dictator,
+      citizen,
+      neutral,
+      classifiedTotal,
+      dictatorPercent: Number(dictatorPercent.toFixed(2)),
+      citizenPercent: Number(citizenPercent.toFixed(2))
+    });
+
+    return hub;
+  }
+
+  function resolveFinalHubTarget(targetId) {
+    if (targetId !== "F0" && targetId !== "S_NEW_2") return targetId;
+    return finalHubForChoiceBalance();
   }
 
   function videoPathFor(sceneId) {
@@ -264,62 +375,82 @@
 
   async function ensureBackgroundMusicPlaying() {
     if (!backgroundMusic) return;
-    ensureBackgroundMusicSource();
+    const music = activeMusicConfig();
+    ensureBackgroundMusicSource(music.file);
     if (!backgroundMusic.currentSrc && !backgroundMusic.src) return;
     applyMusicEnvelope();
     if (!backgroundMusic.paused) return;
     try {
       await backgroundMusic.play();
-      log("music-play", { track: "tragedyminimalism.mp3" });
+      log("music-play", { track: music.file });
     } catch (err) {
       log("music-play-failed", { reason: String(err?.message || err) });
     }
   }
 
-  function primeBackgroundMusicFromGesture() {
+  function primeBackgroundMusicFromGesture(sceneId) {
     if (!backgroundMusic) return;
-    ensureBackgroundMusicSource();
-    if (!backgroundMusic.currentSrc && !backgroundMusic.src) return;
+    const primedFromSceneId = state.currentId;
     state.musicUnlocked = true;
-    const music = musicSettings();
+    const music = musicCueForScene(sceneId) || defaultMusicCue();
+    ensureBackgroundMusicSource(music.file);
+    if (!backgroundMusic.currentSrc && !backgroundMusic.src) return;
     backgroundMusic.currentTime = Number(music.startAtSec || 0);
     backgroundMusic.volume = 0;
     const playPromise = backgroundMusic.play();
     if (playPromise && typeof playPromise.catch === "function") {
       playPromise
         .then(() => {
+          const stillOnActivationScene = state.currentId === primedFromSceneId && sceneById(state.currentId)?.uiMode === "activation";
+          if (!stillOnActivationScene) {
+            log("music-prime-keep-playing", { track: music.file, scene: state.currentId || "-" });
+            return;
+          }
           backgroundMusic.pause();
           backgroundMusic.currentTime = Number(music.startAtSec || 0);
           backgroundMusic.volume = 0;
-          log("music-primed", { track: "tragedyminimalism.mp3" });
+          log("music-primed", { track: music.file });
         })
         .catch((err) => log("music-prime-failed", { reason: String(err?.message || err) }));
     }
   }
 
+  function switchBackgroundMusic(music) {
+    if (!backgroundMusic || !music) return;
+    state.activeMusic = music;
+    ensureBackgroundMusicSource(music.file);
+    backgroundMusic.currentTime = Number(music.startAtSec || 0);
+    applyMusicEnvelope();
+  }
+
   function syncBackgroundMusic(scene) {
     if (!backgroundMusic) return;
-    ensureBackgroundMusicSource();
-    const music = musicSettings();
     backgroundMusic.loop = false;
     if (scene?.uiMode === "activation") {
       backgroundMusic.pause();
       backgroundMusic.currentTime = 0;
       state.musicStarted = false;
+      state.activeMusic = null;
       return;
     }
-    const shouldStartNow = state.currentId === (music.startSceneId || "S2");
-    if (!state.musicStarted && shouldStartNow) {
+
+    const triggeredCue = musicCueForScene(state.currentId);
+    if (triggeredCue) {
       state.musicStarted = true;
-      backgroundMusic.currentTime = Number(music.startAtSec || 0);
+      switchBackgroundMusic(triggeredCue);
+    } else if (!state.musicStarted && state.currentId === (defaultMusicCue().startSceneId || "S2")) {
+      state.musicStarted = true;
+      switchBackgroundMusic(defaultMusicCue());
     }
+
     if (!state.musicStarted || !state.musicUnlocked) return;
+    backgroundMusic.loop = Boolean(activeMusicConfig().loop);
     ensureBackgroundMusicPlaying();
   }
 
   function applyMusicEnvelope() {
     if (!backgroundMusic) return;
-    const music = musicSettings();
+    const music = activeMusicConfig();
     const currentTime = Number(backgroundMusic.currentTime || 0);
     const baseVolume = Math.max(0, Math.min(1, Number(music.volume ?? 1)));
     let volume = baseVolume;
@@ -358,6 +489,7 @@
     if (!isActivationScene) {
       setChoiceState(false);
     }
+    trackChoiceTarget(target);
     log("choice-picked", { direction, label, from: state.currentId, to: target });
 
     // In regular scenes, a click only arms the branch. The actual transition
@@ -540,18 +672,23 @@
     state.transitionLock = true;
 
     try {
-      const target = sceneById(targetId);
+      const resolvedTargetId = resolveFinalHubTarget(targetId);
+      if (resolvedTargetId !== targetId) {
+        log("final-hub-reroute", { requested: targetId, resolved: resolvedTargetId, reason });
+      }
+
+      const target = sceneById(resolvedTargetId);
       if (!target) {
-        log("transition-error", { reason: "unknown-target", to: targetId });
+        log("transition-error", { reason: "unknown-target", to: resolvedTargetId });
         return;
       }
 
       const fromId = state.currentId;
       state.previousId = fromId;
-      state.currentId = targetId;
+      state.currentId = resolvedTargetId;
       state.sceneEnded = false;
       state.pendingChoice = null;
-      const effectiveTarget = effectiveSceneById(targetId);
+      const effectiveTarget = effectiveSceneById(resolvedTargetId);
       const instantChoice = effectiveTarget?.uiMode === "activation";
       state.sceneEnded = Boolean(instantChoice);
       setChoiceState(false);
@@ -559,14 +696,14 @@
       syncBackgroundMusic(effectiveTarget);
 
       const nextLayer = inactiveLayer();
-      const { missing } = await startSceneOnLayer(nextLayer, targetId);
+      const { missing } = await startSceneOnLayer(nextLayer, resolvedTargetId);
 
       const crossfadeMs = Math.max(0, Number(settings().crossfadeMs) || 0);
       activateLayer(nextLayer, crossfadeMs);
 
       log("transition", {
         from: fromId,
-        to: targetId,
+        to: resolvedTargetId,
         reason,
         missing
       });
@@ -588,7 +725,7 @@
     leftBtn.addEventListener("click", () => chooseTarget("left"));
     rightBtn.addEventListener("click", () => chooseTarget("right"));
     activationBtn.addEventListener("click", () => {
-      primeBackgroundMusicFromGesture();
+      primeBackgroundMusicFromGesture(sceneById(state.currentId)?.left);
       chooseTarget("left");
     });
 

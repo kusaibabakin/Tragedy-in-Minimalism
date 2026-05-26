@@ -2,12 +2,12 @@
 
 ## Project
 - Start scene: S01
-- Total scenes: 63
+- Total scenes: 64
 - Crossfade: 0 ms
 
 ## Music
-- File: tragedyminimalism.mp3
-- Start scene: S2
+- File: mainpartaudio.mp3
+- Start scene: S_NEW_25
 - Start at: 0 sec
 - Fade in: 10 sec
 - Fade out start: 0 sec
@@ -39,8 +39,8 @@
 ### S1 - Студия (ведущий + Ленин)
 - Type: choice
 - Video: S1.mp4
-- Left choice: ЛЕНИН - ГРИБ -> D0
-- Right choice: ЛЕНИН - НЕ ГРИБ -> C0
+- Left choice:  ГРИБ -> D0
+- Right choice:  НЕ ГРИБ -> C0
 
 ### D0 - Ленин - гриб
 - Type: linear
@@ -55,14 +55,14 @@
 ### S2 - Площадь
 - Type: choice
 - Video: S2.mp4
-- Left choice: ПТИЦЫ -> D1
-- Right choice: ПРОТЕСТ -> C1
+- Left choice: о погоде -> D1
+- Right choice: о насущном  -> C1
 
 ### D1 - Птицы
 - Type: choice
 - Video: D1.mp4
-- Left choice: УПРАВЛЯТЬ            -> D2
-- Right choice: ОТПУСТИТЬ -> S_NEW_20
+- Left choice: управлять          -> D2
+- Right choice: отпустить -> S_NEW_20
 
 ### D2 - Монумент птицы
 - Type: linear
@@ -113,8 +113,8 @@
 ### D7 - Ядерный гриб
 - Type: choice
 - Video: D7.mp4
-- Left choice: ОСТАТЬСЯ -> D8
-- Right choice: сделать фото -> N10
+- Left choice: остаться -> D8
+- Right choice: сделать фото -> S_NEW_28
 - Auto next: D7
 
 ### D8 - бабушки в телефонах
@@ -136,8 +136,8 @@
 ### F0 - Финальная студия
 - Type: choice
 - Video: F0.mp4
-- Left choice: ДИКТАТУРА: БЕЗДЕЙСТВОВАТЬ -> F1
-- Right choice: ДИКТАТУРА: СОМНЕВАТЬСЯ -> F2
+- Left choice: бездействовать  -> F1
+- Right choice: сомневаться -> F2
 - Variant citizen: left: ГРАЖДАНИН: ПРОДОЛЖИТЬ -> F2 | right: ГРАЖДАНИН: ВЫКЛЮЧИТЬ -> F3
 
 ### F1 - Концовка: диктатура
@@ -156,6 +156,11 @@
 - Type: ending
 - Video: N8.mp4
 - Notes: поцелуй///переход через телевизор в студии
+
+### S_NEW_28
+- Type: linear
+- Video: S_NEW_28.mp4
+- Auto next: N10
 
 ### N10 - селфи  на фоне ядерного гриба
 - Type: choice
@@ -308,8 +313,8 @@
 ### C4 - Красная дверь-поле
 - Type: choice
 - Video: C4.mp4
-- Left choice: трава -> N3
-- Right choice: трава -> C6
+- Left choice: остаться  -> N3
+- Right choice: открыть дверь -> C6
 
 ### S_NEW_20
 - Type: linear
@@ -319,7 +324,7 @@
 ### N1 - Метро с манекенами
 - Type: choice
 - Video: N1.mp4
-- Left choice: ЖИВОТНОЕ -> D3
+- Left choice: животное -> D3
 - Right choice: человек -> C3
 
 ### C3 - Метро с обычными людьми
@@ -341,8 +346,8 @@
 ### C1 - Митинг
 - Type: choice
 - Video: C1.mp4
-- Left choice: РАБОТА -> S_NEW_21
-- Right choice: ЖИЗНЬ -> C2
+- Left choice: работать -> S_NEW_21
+- Right choice: жить -> C2
 
 ### S_NEW_21
 - Type: linear
@@ -372,11 +377,11 @@
 - S_NEW_26: AUTO -> S_NEW_27
 - S_NEW_27: AUTO -> S0
 - S0 (Заставка): AUTO -> S1
-- S1 (Студия (ведущий + Ленин)): ЛЕНИН - ГРИБ -> D0 | ЛЕНИН - НЕ ГРИБ -> C0
+- S1 (Студия (ведущий + Ленин)):  ГРИБ -> D0 |  НЕ ГРИБ -> C0
 - D0 (Ленин - гриб): AUTO -> S_NEW_25
 - S_NEW_25: AUTO -> S2
-- S2 (Площадь): ПТИЦЫ -> D1 | ПРОТЕСТ -> C1
-- D1 (Птицы): УПРАВЛЯТЬ            -> D2 | ОТПУСТИТЬ -> S_NEW_20
+- S2 (Площадь): о погоде -> D1 | о насущном  -> C1
+- D1 (Птицы): управлять          -> D2 | отпустить -> S_NEW_20
 - D2 (Монумент птицы): AUTO -> D3
 - D3 (Метро с животными): остаться -> S_NEW_7 | снять маски -> S_NEW_13
 - S_NEW_7: AUTO -> D4
@@ -385,11 +390,12 @@
 - D6 (ГРиб): AUTO -> N4
 - N4 (Разрастающийся гриб): остаться жить -> S_NEW_1 | сбежать -> S_NEW_11
 - S_NEW_1 (студенты с грибницами): AUTO -> D7
-- D7 (Ядерный гриб): ОСТАТЬСЯ -> D8 | сделать фото -> N10 | AUTO -> D7
+- D7 (Ядерный гриб): остаться -> D8 | сделать фото -> S_NEW_28 | AUTO -> D7
 - D8 (бабушки в телефонах): AUTO -> N6
 - N6 (Человек тащит мусор): копить мусор -> D9 | сортировка мусора -> N8
 - D9 (бабушки на проводах): AUTO -> F0
-- F0 (Финальная студия): ДИКТАТУРА: БЕЗДЕЙСТВОВАТЬ -> F1 | ДИКТАТУРА: СОМНЕВАТЬСЯ -> F2
+- F0 (Финальная студия): бездействовать  -> F1 | сомневаться -> F2
+- S_NEW_28: AUTO -> N10
 - N10 (селфи  на фоне ядерного гриба): сохранить фото -> S_NEW_16 | удалить -> S_NEW_19
 - S_NEW_16: AUTO -> N6
 - S_NEW_19: AUTO -> C11
@@ -416,13 +422,13 @@
 - N2 (Тесная комната): остаться -> S_NEW_9 | выход -> S_NEW_8
 - S_NEW_9: AUTO -> D5
 - S_NEW_8: AUTO -> C4
-- C4 (Красная дверь-поле): трава -> N3 | трава -> C6
+- C4 (Красная дверь-поле): остаться  -> N3 | открыть дверь -> C6
 - S_NEW_20: AUTO -> N1
-- N1 (Метро с манекенами): ЖИВОТНОЕ -> D3 | человек -> C3
+- N1 (Метро с манекенами): животное -> D3 | человек -> C3
 - C3 (Метро с обычными людьми): остаться -> S_NEW_6 | выйти -> S_NEW_4
 - S_NEW_6: AUTO -> N2
 - S_NEW_4 (девушка выходит из метро): AUTO -> C4
-- C1 (Митинг): РАБОТА -> S_NEW_21 | ЖИЗНЬ -> C2
+- C1 (Митинг): работать -> S_NEW_21 | жить -> C2
 - S_NEW_21: AUTO -> N1
 - C2 (полет): AUTO -> S_NEW_5
 - S_NEW_5: AUTO -> C3

@@ -6,13 +6,25 @@
     "missingHoldMs": 900,
     "debugOverlay": false,
     "music": {
-      "file": "tragedyminimalism.mp3",
-      "startSceneId": "S2",
+      "file": "mainpartaudio.mp3",
+      "startSceneId": "S_NEW_25",
       "startAtSec": 0,
       "fadeInSec": 10,
       "fadeOutStartSec": 0,
       "fadeOutDurationSec": 0,
-      "volume": 0.79
+      "volume": 0.79,
+      "cues": [
+        {
+          "file": "zastavkaaudio.mp3",
+          "startSceneId": "S_NEW_26",
+          "startAtSec": 0,
+          "fadeInSec": 0,
+          "fadeOutStartSec": 0,
+          "fadeOutDurationSec": 0,
+          "volume": 1,
+          "loop": false
+        }
+      ]
     },
     "__saveProbe": "2026-04-06T13:30:00Z",
     "videoBaseUrl": "https://pub-4077e61cd3c3400ba4f8b9e50c320690.r2.dev/videos/"
@@ -34,8 +46,8 @@
       "video": "S1.mp4",
       "left": "D0",
       "right": "C0",
-      "leftLabel": "ЛЕНИН - ГРИБ",
-      "rightLabel": "ЛЕНИН - НЕ ГРИБ"
+      "leftLabel": " ГРИБ",
+      "rightLabel": " НЕ ГРИБ"
     },
     "D0": {
       "title": "Ленин - гриб",
@@ -52,16 +64,16 @@
       "video": "S2.mp4",
       "left": "D1",
       "right": "C1",
-      "leftLabel": "ПТИЦЫ",
-      "rightLabel": "ПРОТЕСТ"
+      "leftLabel": "о погоде",
+      "rightLabel": "о насущном "
     },
     "D1": {
       "title": "Птицы",
       "video": "D1.mp4",
       "left": "D2",
       "right": "S_NEW_20",
-      "rightLabel": "ОТПУСТИТЬ",
-      "leftLabel": "УПРАВЛЯТЬ           "
+      "leftLabel": "управлять         ",
+      "rightLabel": "отпустить"
     },
     "D2": {
       "title": "Монумент птицы",
@@ -99,10 +111,10 @@
       "title": "Ядерный гриб",
       "video": "D7.mp4",
       "left": "D8",
-      "leftLabel": "ОСТАТЬСЯ",
       "next": "D7",
-      "right": "N10",
-      "rightLabel": "сделать фото"
+      "right": "S_NEW_28",
+      "rightLabel": "сделать фото",
+      "leftLabel": "остаться"
     },
     "D8": {
       "video": "D8.mp4",
@@ -119,8 +131,8 @@
       "video": "C1.mp4",
       "left": "S_NEW_21",
       "right": "C2",
-      "leftLabel": "РАБОТА",
-      "rightLabel": "ЖИЗНЬ"
+      "leftLabel": "работать",
+      "rightLabel": "жить"
     },
     "C2": {
       "video": "C2.mp4",
@@ -141,8 +153,8 @@
       "video": "C4.mp4",
       "left": "N3",
       "right": "C6",
-      "leftLabel": "трава",
-      "rightLabel": "трава"
+      "leftLabel": "остаться ",
+      "rightLabel": "открыть дверь"
     },
     "C6": {
       "video": "C6.mp4",
@@ -185,9 +197,9 @@
       "title": "Метро с манекенами",
       "video": "N1.mp4",
       "left": "D3",
-      "leftLabel": "ЖИВОТНОЕ",
       "right": "C3",
-      "rightLabel": "человек"
+      "rightLabel": "человек",
+      "leftLabel": "животное"
     },
     "N2": {
       "title": "Тесная комната",
@@ -249,8 +261,6 @@
       "video": "F0.mp4",
       "left": "F1",
       "right": "F2",
-      "leftLabel": "ДИКТАТУРА: БЕЗДЕЙСТВОВАТЬ",
-      "rightLabel": "ДИКТАТУРА: СОМНЕВАТЬСЯ",
       "variants": {
         "citizen": {
           "left": "F2",
@@ -258,7 +268,9 @@
           "leftLabel": "ГРАЖДАНИН: ПРОДОЛЖИТЬ",
           "rightLabel": "ГРАЖДАНИН: ВЫКЛЮЧИТЬ"
         }
-      }
+      },
+      "leftLabel": "бездействовать ",
+      "rightLabel": "сомневаться"
     },
     "F1": {
       "title": "Концовка: диктатура",
@@ -394,6 +406,10 @@
     "S_NEW_27": {
       "next": "S0",
       "video": "S_NEW_27.mp4"
+    },
+    "S_NEW_28": {
+      "next": "N10",
+      "video": "S_NEW_28.mp4"
     }
   },
   "layout": {
@@ -402,8 +418,8 @@
       "y": 445
     },
     "S0": {
-      "x": 574,
-      "y": 712
+      "x": 408,
+      "y": 706
     },
     "S1": {
       "x": 413,
@@ -446,11 +462,11 @@
       "y": 16
     },
     "D7": {
-      "x": 3229,
+      "x": 3227,
       "y": 58
     },
     "D8": {
-      "x": 3467,
+      "x": 3541,
       "y": 17
     },
     "D9": {
@@ -470,16 +486,16 @@
       "y": 1411
     },
     "C4": {
-      "x": 2320,
-      "y": 1681
+      "x": 2404,
+      "y": 1744
     },
     "C6": {
-      "x": 2669,
-      "y": 1356
+      "x": 2739,
+      "y": 1419
     },
     "C8": {
-      "x": 3408,
-      "y": 1442
+      "x": 3459,
+      "y": 1443
     },
     "C9": {
       "x": 3552,
@@ -494,8 +510,8 @@
       "y": 1503
     },
     "N1": {
-      "x": 1502,
-      "y": 1089
+      "x": 1527,
+      "y": 1141
     },
     "N2": {
       "x": 2054,
@@ -586,8 +602,8 @@
       "y": 426
     },
     "S_NEW_12": {
-      "x": 3176,
-      "y": 1606
+      "x": 3190,
+      "y": 1690
     },
     "S_NEW_13": {
       "x": 1791,
@@ -598,8 +614,8 @@
       "y": 1004
     },
     "S_NEW_15": {
-      "x": 2576,
-      "y": 363
+      "x": 3739,
+      "y": 377
     },
     "S_NEW_16": {
       "x": 3655,
@@ -610,7 +626,7 @@
       "y": 1129
     },
     "S_NEW_18": {
-      "x": 3144,
+      "x": 3142,
       "y": 302
     },
     "S_NEW_19": {
@@ -626,12 +642,12 @@
       "y": 1282
     },
     "S_NEW_22": {
-      "x": 3428,
-      "y": 1124
+      "x": 3371,
+      "y": 1125
     },
     "S_NEW_23": {
-      "x": 2183,
-      "y": 410
+      "x": 2315,
+      "y": 412
     },
     "S_NEW_24": {
       "x": 2892,
@@ -648,6 +664,10 @@
     "S_NEW_27": {
       "x": 214,
       "y": 738
+    },
+    "S_NEW_28": {
+      "x": 3474,
+      "y": 491
     }
   }
 }
