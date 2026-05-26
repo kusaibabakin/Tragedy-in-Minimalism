@@ -14,7 +14,8 @@ const siteFiles = [
 
 const siteDirs = [
   "audio",
-  "fonts"
+  "fonts",
+  "assets"
 ];
 
 function loadSiteConfig() {

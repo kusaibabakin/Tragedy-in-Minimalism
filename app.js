@@ -35,6 +35,7 @@
   const activationScreen = document.getElementById("activationScreen");
   const activationBackdropVideo = document.getElementById("activationBackdropVideo");
   const activationBtn = document.getElementById("activationBtn");
+  const activationBtnLabel = document.getElementById("activationBtnLabel");
   const creatorGate = document.getElementById("creatorGate");
   const creatorPasswordInput = document.getElementById("creatorPasswordInput");
   const creatorGateError = document.getElementById("creatorGateError");
@@ -370,7 +371,12 @@
       }
     }
     if (!enabled) return;
-    activationBtn.textContent = scene?.leftLabel || "ВКЛЮЧИТЬ ТРАНСЛЯЦИЮ";
+    const activationLabel = scene?.leftLabel || "ВКЛЮЧИТЬ ТРАНСЛЯЦИЮ";
+    activationBtn.setAttribute("aria-label", activationLabel);
+    activationBtn.title = activationLabel;
+    if (activationBtnLabel) {
+      activationBtnLabel.textContent = activationLabel;
+    }
   }
 
   async function ensureBackgroundMusicPlaying() {

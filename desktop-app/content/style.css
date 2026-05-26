@@ -195,6 +195,18 @@ body {
   white-space: pre-wrap;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .activation-screen {
   position: absolute;
   inset: 0;
@@ -221,48 +233,47 @@ body {
 .activation-card {
   position: relative;
   z-index: 1;
-  width: min(560px, calc(100% - 40px));
-  padding: 28px;
-  border: 1px solid rgba(255,255,255,0.16);
-  border-radius: 24px;
-  background: rgba(10, 12, 18, 0.82);
-  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.5);
+  width: min(760px, calc(100% - 48px));
+  padding: 24px 20px 12px;
   text-align: center;
-  backdrop-filter: blur(10px);
-}
-
-.activation-kicker {
-  margin: 0 0 12px;
-  color: #9ca3af;
-  font-size: 12px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
 }
 
 .activation-title {
-  margin: 0 0 22px;
-  font-size: clamp(28px, 4vw, 46px);
-  line-height: 1.05;
+  margin: 0 0 32px;
+  color: #f3f4f6;
+  font-size: clamp(34px, 5vw, 82px);
+  line-height: 0.94;
+  letter-spacing: 0.04em;
+  text-shadow: 0 8px 30px rgba(0, 0, 0, 0.58);
 }
 
 .activation-btn {
-  min-width: min(100%, 360px);
-  min-height: 64px;
+  position: relative;
+  width: min(100%, 520px);
+  padding: 0;
   border: 0;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #f3f4f6, #93c5fd);
-  color: #0b0b0b;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  background: transparent;
   cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition: transform 160ms ease, filter 160ms ease;
+  appearance: none;
 }
 
 .activation-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 32px rgba(147, 197, 253, 0.28);
+  filter: drop-shadow(0 14px 38px rgba(255, 235, 205, 0.25));
+}
+
+.activation-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 8px;
+}
+
+.activation-btn-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.42));
 }
 
 .creator-gate {
