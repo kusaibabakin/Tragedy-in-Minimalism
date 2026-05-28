@@ -6,6 +6,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Handjet";
+  src: url("./fonts/Handjet-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #000;
   --fg: #e8e8e8;
@@ -121,16 +129,12 @@ body {
 .choice-panel {
   position: absolute;
   left: 50%;
-  bottom: 20px;
+  bottom: 48px;
   transform: translateX(-50%);
-  width: min(740px, calc(100% - 32px));
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--panel);
-  backdrop-filter: blur(5px);
-  padding: 12px;
+  width: min(880px, calc(100% - 48px));
+  padding: 0;
   display: none;
-  gap: 10px;
+  justify-items: center;
 }
 
 .choice-panel.is-active {
@@ -143,37 +147,52 @@ body {
 
 .choice-buttons {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  justify-items: center;
+  gap: 14px;
+  width: 100%;
 }
 
 .choice-btn {
-  min-height: 46px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  color: #0b0b0b;
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 700;
+  min-height: 0;
+  padding: 8px 18px 10px;
+  border: 0;
+  background: transparent;
+  color: #63ff72;
+  font-family: "Handjet", "Buse", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  font-size: clamp(32px, 3.4vw, 52px);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  line-height: 1;
   cursor: pointer;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 8px rgba(80, 255, 120, 0.45),
+    0 0 1px rgba(80, 255, 120, 0.9);
+  transition: background-color 140ms ease, color 140ms ease, text-shadow 140ms ease, transform 140ms ease;
+  appearance: none;
 }
 
 .choice-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.3;
   cursor: default;
 }
 
 #leftBtn {
-  background: var(--accent-left);
+  background: transparent;
 }
 
 #rightBtn {
-  background: var(--accent-right);
+  background: transparent;
 }
 
+.choice-btn:hover,
+.choice-btn:focus-visible,
 .choice-btn.is-selected {
-  border-color: #fff;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.32) inset;
+  outline: none;
+  background: rgba(99, 255, 114, 0.9);
+  color: #031306;
+  text-shadow: none;
+  transform: translateY(-1px);
 }
 
 .input-hint {

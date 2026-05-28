@@ -42,32 +42,8 @@ function emptyDir(dir) {
   }
 }
 
-function filesDiffer(a, b) {
-  if (!fs.existsSync(a) || !fs.existsSync(b)) return true;
-  const aBuf = fs.readFileSync(a);
-  const bBuf = fs.readFileSync(b);
-  return !aBuf.equals(bBuf);
-}
-
-function protectNewerContentStory() {
-  const rootStory = path.join(root, 'story.json');
-  const contentStory = path.join(out, 'story.json');
-
-  if (!fs.existsSync(contentStory) || !fs.existsSync(rootStory)) return;
-
-  const rootStat = fs.statSync(rootStory);
-  const contentStat = fs.statSync(contentStory);
-  const contentIsNewer = contentStat.mtimeMs > rootStat.mtimeMs;
-
-  if (!contentIsNewer) return;
-  if (!filesDiffer(rootStory, contentStory)) return;
-
-  copyFile(contentStory, rootStory);
-}
-
 function run() {
   ensureDir(out);
-  protectNewerContentStory();
   emptyDir(out);
 
   for (const file of srcFiles) {
@@ -101,6 +77,14 @@ function run() {
     copyDir(fontsSrc, fontsDst);
   } else {
     ensureDir(fontsDst);
+  }
+
+  const assetsSrc = path.join(root, 'assets');
+  const assetsDst = path.join(out, 'assets');
+  if (fs.existsSync(assetsSrc)) {
+    copyDir(assetsSrc, assetsDst);
+  } else {
+    ensureDir(assetsDst);
   }
 
   console.log(`Synced content -> ${out}`);

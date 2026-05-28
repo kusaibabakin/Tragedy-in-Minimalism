@@ -7,6 +7,26 @@ const { buildScenarioOutline, outlinePathForStory } = require('./story-outline')
 let win = null;
 let server = null;
 
+function appIconPath() {
+  const projectRoot = findProjectRoot();
+  const candidates = [];
+
+  if (projectRoot) {
+    candidates.push(
+      path.join(projectRoot, 'desktop-app', 'content', 'assets', 'app-icon.png'),
+      path.join(projectRoot, 'assets', 'app-icon.png')
+    );
+  }
+
+  candidates.push(path.join(contentRoot(), 'assets', 'app-icon.png'));
+
+  for (const candidate of uniquePaths(candidates)) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+
+  return '';
+}
+
 function uniquePaths(paths) {
   const out = [];
   for (const entry of paths) {
@@ -323,12 +343,14 @@ function stopStaticServer() {
 }
 
 function createMainWindow(url) {
+  const icon = appIconPath();
   win = new BrowserWindow({
     width: 1440,
     height: 900,
     backgroundColor: '#000000',
     title: 'Tragedy in Minimalism',
     autoHideMenuBar: true,
+    icon: icon || undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -366,6 +388,11 @@ function createMainWindow(url) {
 
 app.whenReady().then(async () => {
   try {
+    const icon = appIconPath();
+    if (process.platform === 'darwin' && icon && app.dock?.setIcon) {
+      app.dock.setIcon(icon);
+    }
+
     ipcMain.handle('story:save', async (_event, payload) => {
       if (!payload || typeof payload !== 'object') {
         throw new Error('Invalid story payload.');

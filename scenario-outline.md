@@ -2,7 +2,7 @@
 
 ## Project
 - Start scene: S01
-- Total scenes: 64
+- Total scenes: 77
 - Crossfade: 0 ms
 
 ## Music
@@ -39,8 +39,8 @@
 ### S1 - Студия (ведущий + Ленин)
 - Type: choice
 - Video: S1.mp4
-- Left choice:  ГРИБ -> D0
-- Right choice:  НЕ ГРИБ -> C0
+- Left choice: ГРИБ -> D0
+- Right choice: НЕ ГРИБ -> C0
 
 ### D0 - Ленин - гриб
 - Type: linear
@@ -56,12 +56,12 @@
 - Type: choice
 - Video: S2.mp4
 - Left choice: о погоде -> D1
-- Right choice: о насущном  -> C1
+- Right choice: о насущном -> C1
 
 ### D1 - Птицы
 - Type: choice
 - Video: D1.mp4
-- Left choice: управлять          -> D2
+- Left choice: управлять -> D2
 - Right choice: отпустить -> S_NEW_20
 
 ### D2 - Монумент птицы
@@ -131,12 +131,17 @@
 ### D9 - бабушки на проводах
 - Type: linear
 - Video: D9.mp4
+- Auto next: S_NEW_29
+
+### S_NEW_29
+- Type: linear
+- Video: S_NEW_29.mp4
 - Auto next: F0
 
 ### F0 - Финальная студия
 - Type: choice
 - Video: F0.mp4
-- Left choice: бездействовать  -> F1
+- Left choice: бездействовать -> F1
 - Right choice: сомневаться -> F2
 - Variant citizen: left: ГРАЖДАНИН: ПРОДОЛЖИТЬ -> F2 | right: ГРАЖДАНИН: ВЫКЛЮЧИТЬ -> F3
 
@@ -153,10 +158,15 @@
 - Video: F3.mp4
 
 ### N8 - Пара в газете
-- Type: ending
+- Type: linear
 - Video: N8.mp4
-- Auto next: prefinal routing by choice balance
+- Auto next: S_NEW_30
 - Notes: поцелуй///переход через телевизор в студии
+
+### S_NEW_30
+- Type: linear
+- Video: S_NEW_30.mp4
+- Auto next: F0
 
 ### S_NEW_28
 - Type: linear
@@ -189,8 +199,13 @@
 ### C10 - Горящая газета
 - Type: linear
 - Video: C10.mp4
-- Auto next: S_NEW_2
+- Auto next: S_NEW_31
 - Notes: переход через телевизор в студии
+
+### S_NEW_31
+- Type: linear
+- Video: S_NEW_31.mp4
+- Auto next: S_NEW_2
 
 ### S_NEW_2 - финальная студия-ведущий
 - Type: choice
@@ -249,7 +264,7 @@
 ### N3 - Марионетка
 - Type: choice
 - Video: N3.mp4
-- Left choice: оставить как есть  -> S_NEW_15
+- Left choice: оставить как есть -> S_NEW_15
 - Right choice: обрезать нити -> S_NEW_14
 
 ### S_NEW_15
@@ -314,7 +329,7 @@
 ### C4 - Красная дверь-поле
 - Type: choice
 - Video: C4.mp4
-- Left choice: остаться  -> N3
+- Left choice: остаться -> N3
 - Right choice: открыть дверь -> C6
 
 ### S_NEW_20
@@ -372,17 +387,64 @@
 - Video: C0.mp4
 - Auto next: S_NEW_25
 
+### Z_TIMEOUT_1 - Вставка тайм-аута 1
+- Type: linear
+- Video: z1.mp4
+- Auto next: __RETRY_CHOICE__
+
+### Z_TIMEOUT_2 - Вставка тайм-аута 2
+- Type: linear
+- Video: z2.mp4
+- Auto next: __RETRY_CHOICE__
+
+### Z_TIMEOUT_3 - Вставка тайм-аута 3
+- Type: linear
+- Video: z3.mp4
+- Auto next: __RETRY_CHOICE__
+
+### Z_TIMEOUT_4 - Вставка тайм-аута 4
+- Type: linear
+- Video: z4.mp4
+- Auto next: __RETRY_CHOICE__
+
+### Z_TIMEOUT_5 - Вставка тайм-аута 5
+- Type: linear
+- Video: z5.mp4
+- Auto next: __RETRY_CHOICE__
+
+### Z_TIMEOUT_6 - Вставка тайм-аута 6
+- Type: linear
+- Video: z6.mp4
+- Auto next: __RETRY_CHOICE__
+
+### Z_TIMEOUT_7 - Вставка тайм-аута 7
+- Type: linear
+- Video: z7.mp4
+- Auto next: __RETRY_CHOICE__
+
+### S_NEW_32
+- Type: ending
+- Video: S_NEW_32.mp4
+
+### S_NEW_33
+- Type: ending
+- Video: S_NEW_33.mp4
+
+### S_NEW_34
+- Type: ending
+- Video: S_NEW_34.mp4
+
 ## Branch Summary
 
 - S01 (Активация проекта): ВКЛЮЧИТЬ ТРАНСЛЯЦИЮ -> S_NEW_26
 - S_NEW_26: AUTO -> S_NEW_27
 - S_NEW_27: AUTO -> S0
 - S0 (Заставка): AUTO -> S1
-- S1 (Студия (ведущий + Ленин)):  ГРИБ -> D0 |  НЕ ГРИБ -> C0
+- S1 (Студия (ведущий + Ленин)): ГРИБ -> D0 | НЕ ГРИБ -> C0
 - D0 (Ленин - гриб): AUTO -> S_NEW_25
 - S_NEW_25: AUTO -> S2
-- S2 (Площадь): о погоде -> D1 | о насущном  -> C1
-- D1 (Птицы): управлять          -> D2 | отпустить -> S_NEW_20
+- S2 (Площадь): о погоде -> D1 | о насущном -> C1
+- D1 (Птицы): управлять -> D2 | отпустить -> S_NEW_20
 - D2 (Монумент птицы): AUTO -> D3
 - D3 (Метро с животными): остаться -> S_NEW_7 | снять маски -> S_NEW_13
 - S_NEW_7: AUTO -> D4
@@ -394,15 +456,18 @@
 - D7 (Ядерный гриб): остаться -> D8 | сделать фото -> S_NEW_28 | AUTO -> D7
 - D8 (бабушки в телефонах): AUTO -> N6
 - N6 (Человек тащит мусор): копить мусор -> D9 | сортировка мусора -> N8
-- D9 (бабушки на проводах): AUTO -> prefinal routing by choice balance
-- F0 (Финальная студия): бездействовать  -> F1 | сомневаться -> F2
+- D9 (бабушки на проводах): AUTO -> S_NEW_29
+- S_NEW_29: AUTO -> F0
+- F0 (Финальная студия): бездействовать -> F1 | сомневаться -> F2
+- N8 (Пара в газете): AUTO -> S_NEW_30
+- S_NEW_30: AUTO -> F0
 - S_NEW_28: AUTO -> N10
 - N10 (селфи  на фоне ядерного гриба): сохранить фото -> S_NEW_16 | удалить -> S_NEW_19
 - S_NEW_16: AUTO -> N6
 - S_NEW_19: AUTO -> C11
 - C11 (летящие бабушки): прочитать -> N8 | игнорировать -> C10
-- C10 (Горящая газета): AUTO -> prefinal routing by choice balance
-- N8 (Пара в газете): AUTO -> prefinal routing by choice balance
+- C10 (Горящая газета): AUTO -> S_NEW_31
+- S_NEW_31: AUTO -> S_NEW_2
 - S_NEW_2 (финальная студия-ведущий): продолжить просмотр -> F2 | выключить -> F3
 - S_NEW_11: AUTO -> S_NEW_24
 - S_NEW_24: AUTO -> N5
@@ -413,7 +478,7 @@
 - S_NEW_22: N10
 - C9 (Счастливые бабушки): AUTO -> C11
 - S_NEW_23: AUTO -> N3
-- N3 (Марионетка): оставить как есть  -> S_NEW_15 | обрезать нити -> S_NEW_14
+- N3 (Марионетка): оставить как есть -> S_NEW_15 | обрезать нити -> S_NEW_14
 - S_NEW_15: AUTO -> N4
 - S_NEW_14: AUTO -> C6
 - C6 (девушка лежит в траве): пустить корни -> S_NEW_10 | исследовать пространство -> S_NEW_3
@@ -424,7 +489,7 @@
 - N2 (Тесная комната): остаться -> S_NEW_9 | выход -> S_NEW_8
 - S_NEW_9: AUTO -> D5
 - S_NEW_8: AUTO -> C4
-- C4 (Красная дверь-поле): остаться  -> N3 | открыть дверь -> C6
+- C4 (Красная дверь-поле): остаться -> N3 | открыть дверь -> C6
 - S_NEW_20: AUTO -> N1
 - N1 (Метро с манекенами): животное -> D3 | человек -> C3
 - C3 (Метро с обычными людьми): остаться -> S_NEW_6 | выйти -> S_NEW_4
@@ -435,13 +500,22 @@
 - C2 (полет): AUTO -> S_NEW_5
 - S_NEW_5: AUTO -> C3
 - C0 (Ленин - не гриб): AUTO -> S_NEW_25
+- Z_TIMEOUT_1 (Вставка тайм-аута 1): AUTO -> __RETRY_CHOICE__
+- Z_TIMEOUT_2 (Вставка тайм-аута 2): AUTO -> __RETRY_CHOICE__
+- Z_TIMEOUT_3 (Вставка тайм-аута 3): AUTO -> __RETRY_CHOICE__
+- Z_TIMEOUT_4 (Вставка тайм-аута 4): AUTO -> __RETRY_CHOICE__
+- Z_TIMEOUT_5 (Вставка тайм-аута 5): AUTO -> __RETRY_CHOICE__
+- Z_TIMEOUT_6 (Вставка тайм-аута 6): AUTO -> __RETRY_CHOICE__
+- Z_TIMEOUT_7 (Вставка тайм-аута 7): AUTO -> __RETRY_CHOICE__
 
 ## Endings
 
-- N8 - Пара в газете
 - F1 - Концовка: диктатура
 - F2 - Концовка: нейтральная
 - F3 - Концовка: гражданин
+- S_NEW_32
+- S_NEW_33
+- S_NEW_34
 
 ## Writing Notes
 
@@ -449,3 +523,4 @@
 - Expand scene notes into action, image, and dialogue.
 - Use the branch summary to separate alternative scene versions.
 - Use the endings list as targets for full linear screenplay drafts.
+

@@ -14,6 +14,7 @@
     musicUnlocked: false,
     musicStarted: false,
     activeMusic: null,
+    retryChoiceSceneId: null,
     choiceStats: {
       dictator: 0,
       citizen: 0,
@@ -258,6 +259,28 @@
     return finalHubForChoiceBalance();
   }
 
+  function resolveSpecialTarget(targetId) {
+    if (targetId === "__RETRY_CHOICE__") {
+      return state.retryChoiceSceneId || settings().start;
+    }
+    if (targetId === "__FINAL_LOOP_INSERT__") {
+      return randomFinalLoopInsertionId() || "S1";
+    }
+    return targetId;
+  }
+
+  function randomChoiceTimeoutInsertionId() {
+    const ids = Array.isArray(settings().choiceTimeoutInsertionIds) ? settings().choiceTimeoutInsertionIds : [];
+    if (!ids.length) return null;
+    return ids[Math.floor(Math.random() * ids.length)] || null;
+  }
+
+  function randomFinalLoopInsertionId() {
+    const ids = Array.isArray(settings().finalLoopInsertionIds) ? settings().finalLoopInsertionIds : [];
+    if (!ids.length) return null;
+    return ids[Math.floor(Math.random() * ids.length)] || null;
+  }
+
   function videoPathFor(sceneId) {
     const scene = sceneById(sceneId);
     const file = scene?.video || `${sceneId}.mp4`;
@@ -344,6 +367,7 @@
     const rightLabel = normalizeLabel(scene?.rightLabel);
     leftBtn.disabled = !enabled || !leftTarget;
     rightBtn.disabled = !enabled || !rightTarget;
+    leftBtn.hidden = !leftTarget;
     rightBtn.hidden = !rightTarget;
 
     leftBtn.classList.toggle("is-selected", state.pendingChoice === "left");
@@ -561,16 +585,15 @@
         }
       }
 
-      const autoDirection = randomChoiceDirection(scene);
-      const autoTarget = autoDirection === "left" ? scene.left : scene.right;
-      if (autoDirection && autoTarget) {
-        log("choice-auto-picked", {
-          direction: autoDirection,
+      const insertionSceneId = randomChoiceTimeoutInsertionId();
+      if (insertionSceneId) {
+        state.retryChoiceSceneId = sceneId;
+        log("choice-timeout-retry", {
           from: sceneId,
-          reason: "choice-time-expired",
-          to: autoTarget
+          insertion: insertionSceneId,
+          retryScene: sceneId
         });
-        gotoScene(autoTarget, `choice-timeout-${autoDirection}`);
+        gotoScene(insertionSceneId, "choice-timeout-retry");
         return;
       }
 
@@ -684,7 +707,7 @@
     state.transitionLock = true;
 
     try {
-      const resolvedTargetId = resolveFinalHubTarget(targetId);
+      const resolvedTargetId = resolveFinalHubTarget(resolveSpecialTarget(targetId));
       if (resolvedTargetId !== targetId) {
         log("final-hub-reroute", { requested: targetId, resolved: resolvedTargetId, reason });
       }
@@ -707,8 +730,17 @@
       setActivationState(Boolean(instantChoice), effectiveTarget);
       syncBackgroundMusic(effectiveTarget);
 
+      const shouldRevealChoicesImmediately = !instantChoice && (effectiveTarget?.left || effectiveTarget?.right);
+      if (shouldRevealChoicesImmediately) {
+        setChoiceState(true);
+        log("choice-revealed", { scene: resolvedTargetId, reason: "scene-start" });
+      }
+
       const nextLayer = inactiveLayer();
       const { missing } = await startSceneOnLayer(nextLayer, resolvedTargetId);
+      if (shouldRevealChoicesImmediately) {
+        nextLayer.revealHandled = true;
+      }
 
       const crossfadeMs = Math.max(0, Number(settings().crossfadeMs) || 0);
       activateLayer(nextLayer, crossfadeMs);

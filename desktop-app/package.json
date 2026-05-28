@@ -32,7 +32,8 @@
         "dir",
         "dmg"
       ],
-      "category": "public.app-category.entertainment"
+      "category": "public.app-category.entertainment",
+      "icon": "build/icon.png"
     },
     "win": {
       "target": [
