@@ -2,7 +2,7 @@
 
 ## Project
 - Start scene: S01
-- Total scenes: 77
+- Total scenes: 85
 - Crossfade: 0 ms
 
 ## Music
@@ -141,21 +141,34 @@
 ### F0 - Финальная студия
 - Type: choice
 - Video: F0.mp4
-- Left choice: бездействовать -> F1
-- Right choice: сомневаться -> F2
+- Left choice: бездействовать -> S_NEW_35
+- Right choice: сомневаться -> S_NEW_32
 - Variant citizen: left: ГРАЖДАНИН: ПРОДОЛЖИТЬ -> F2 | right: ГРАЖДАНИН: ВЫКЛЮЧИТЬ -> F3
 
+### S_NEW_35
+- Type: linear
+- Video: S_NEW_35.mp4
+- Auto next: F1
+
 ### F1 - Концовка: диктатура
-- Type: ending
+- Type: linear
 - Video: F1.mp4
+- Auto next: __FINAL_LOOP_INSERT__
+
+### S_NEW_32
+- Type: linear
+- Video: S_NEW_32.mp4
+- Auto next: F2
 
 ### F2 - Концовка: нейтральная
-- Type: ending
+- Type: linear
 - Video: F2.mp4
+- Auto next: __FINAL_LOOP_INSERT__
 
 ### F3 - Концовка: гражданин
-- Type: ending
-- Video: F3.mp4
+- Type: linear
+- Video: f3.mp4
+- Auto next: __FINAL_LOOP_INSERT__
 
 ### N8 - Пара в газете
 - Type: linear
@@ -210,8 +223,18 @@
 ### S_NEW_2 - финальная студия-ведущий
 - Type: choice
 - Video: S_NEW_2.mp4
-- Left choice: продолжить просмотр -> F2
-- Right choice: выключить -> F3
+- Left choice: продолжить просмотр -> S_NEW_34
+- Right choice: выключить -> S_NEW_33
+
+### S_NEW_34
+- Type: linear
+- Video: S_NEW_34.mp4
+- Auto next: F2
+
+### S_NEW_33
+- Type: linear
+- Video: S_NEW_33.mp4
+- Auto next: F3
 
 ### S_NEW_11
 - Type: linear
@@ -227,7 +250,7 @@
 - Type: choice
 - Video: N5.mp4
 - Left choice: надеть очки -> S_NEW_18
-- Right choice: не надевает очки -> S_NEW_17
+- Right choice: не надевать очки -> S_NEW_17
 
 ### S_NEW_18
 - Type: linear
@@ -247,9 +270,9 @@
 - Notes: -берем телефон | -пространство заполняется цветами
 
 ### S_NEW_22
-- Type: choice
+- Type: linear
 - Video: S_NEW_22.mp4
-- Right choice: N10
+- Auto next: N10
 
 ### C9 - Счастливые бабушки
 - Type: linear
@@ -329,8 +352,18 @@
 ### C4 - Красная дверь-поле
 - Type: choice
 - Video: C4.mp4
-- Left choice: остаться -> N3
-- Right choice: открыть дверь -> C6
+- Left choice: остаться -> S_NEW_36
+- Right choice: открыть дверь -> S_NEW_37
+
+### S_NEW_36
+- Type: linear
+- Video: S_NEW_36.mp4
+- Auto next: N3
+
+### S_NEW_37
+- Type: linear
+- Video: S_NEW_37.mp4
+- Auto next: C6
 
 ### S_NEW_20
 - Type: linear
@@ -422,17 +455,30 @@
 - Video: z7.mp4
 - Auto next: __RETRY_CHOICE__
 
-### S_NEW_32
-- Type: ending
-- Video: S_NEW_32.mp4
+### Z_FINAL_1 - Финальная вставка 1
+- Type: linear
+- Video: p1.mp4
+- Auto next: S1
 
-### S_NEW_33
-- Type: ending
-- Video: S_NEW_33.mp4
+### Z_FINAL_2 - Финальная вставка 2
+- Type: linear
+- Video: p2.mp4
+- Auto next: S1
 
-### S_NEW_34
-- Type: ending
-- Video: S_NEW_34.mp4
+### Z_FINAL_3 - Финальная вставка 3
+- Type: linear
+- Video: p3.mp4
+- Auto next: S1
+
+### Z_FINAL_4 - Финальная вставка 4
+- Type: linear
+- Video: p4.mp4
+- Auto next: S1
+
+### Z_FINAL_5 - Финальная вставка 5
+- Type: linear
+- Video: p5.mp4
+- Auto next: S1
 
 ## Branch Summary
 
@@ -458,7 +504,12 @@
 - N6 (Человек тащит мусор): копить мусор -> D9 | сортировка мусора -> N8
 - D9 (бабушки на проводах): AUTO -> S_NEW_29
 - S_NEW_29: AUTO -> F0
-- F0 (Финальная студия): бездействовать -> F1 | сомневаться -> F2
+- F0 (Финальная студия): бездействовать -> S_NEW_35 | сомневаться -> S_NEW_32
+- S_NEW_35: AUTO -> F1
+- F1 (Концовка: диктатура): AUTO -> __FINAL_LOOP_INSERT__
+- S_NEW_32: AUTO -> F2
+- F2 (Концовка: нейтральная): AUTO -> __FINAL_LOOP_INSERT__
+- F3 (Концовка: гражданин): AUTO -> __FINAL_LOOP_INSERT__
 - N8 (Пара в газете): AUTO -> S_NEW_30
 - S_NEW_30: AUTO -> F0
 - S_NEW_28: AUTO -> N10
@@ -468,14 +519,16 @@
 - C11 (летящие бабушки): прочитать -> N8 | игнорировать -> C10
 - C10 (Горящая газета): AUTO -> S_NEW_31
 - S_NEW_31: AUTO -> S_NEW_2
-- S_NEW_2 (финальная студия-ведущий): продолжить просмотр -> F2 | выключить -> F3
+- S_NEW_2 (финальная студия-ведущий): продолжить просмотр -> S_NEW_34 | выключить -> S_NEW_33
+- S_NEW_34: AUTO -> F2
+- S_NEW_33: AUTO -> F3
 - S_NEW_11: AUTO -> S_NEW_24
 - S_NEW_24: AUTO -> N5
-- N5 (девушка в поле): надеть очки -> S_NEW_18 | не надевает очки -> S_NEW_17
+- N5 (девушка в поле): надеть очки -> S_NEW_18 | не надевать очки -> S_NEW_17
 - S_NEW_18: AUTO -> D7
 - S_NEW_17: AUTO -> C8
 - C8 (Закат): сделать селфи -> S_NEW_22 | цифровой детокс -> C9
-- S_NEW_22: N10
+- S_NEW_22: AUTO -> N10
 - C9 (Счастливые бабушки): AUTO -> C11
 - S_NEW_23: AUTO -> N3
 - N3 (Марионетка): оставить как есть -> S_NEW_15 | обрезать нити -> S_NEW_14
@@ -489,7 +542,9 @@
 - N2 (Тесная комната): остаться -> S_NEW_9 | выход -> S_NEW_8
 - S_NEW_9: AUTO -> D5
 - S_NEW_8: AUTO -> C4
-- C4 (Красная дверь-поле): остаться -> N3 | открыть дверь -> C6
+- C4 (Красная дверь-поле): остаться -> S_NEW_36 | открыть дверь -> S_NEW_37
+- S_NEW_36: AUTO -> N3
+- S_NEW_37: AUTO -> C6
 - S_NEW_20: AUTO -> N1
 - N1 (Метро с манекенами): животное -> D3 | человек -> C3
 - C3 (Метро с обычными людьми): остаться -> S_NEW_6 | выйти -> S_NEW_4
@@ -507,15 +562,15 @@
 - Z_TIMEOUT_5 (Вставка тайм-аута 5): AUTO -> __RETRY_CHOICE__
 - Z_TIMEOUT_6 (Вставка тайм-аута 6): AUTO -> __RETRY_CHOICE__
 - Z_TIMEOUT_7 (Вставка тайм-аута 7): AUTO -> __RETRY_CHOICE__
+- Z_FINAL_1 (Финальная вставка 1): AUTO -> S1
+- Z_FINAL_2 (Финальная вставка 2): AUTO -> S1
+- Z_FINAL_3 (Финальная вставка 3): AUTO -> S1
+- Z_FINAL_4 (Финальная вставка 4): AUTO -> S1
+- Z_FINAL_5 (Финальная вставка 5): AUTO -> S1
 
 ## Endings
 
-- F1 - Концовка: диктатура
-- F2 - Концовка: нейтральная
-- F3 - Концовка: гражданин
-- S_NEW_32
-- S_NEW_33
-- S_NEW_34
+- No terminal scenes found.
 
 ## Writing Notes
 

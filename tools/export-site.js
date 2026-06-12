@@ -66,6 +66,15 @@ function collectUsedAudioFiles(story) {
     if (!cue?.file) continue;
     used.add(String(cue.file).trim());
   }
+
+  const sceneAudioFiles = story?.settings?.sceneAudio?.files;
+  if (sceneAudioFiles && typeof sceneAudioFiles === "object") {
+    for (const file of Object.values(sceneAudioFiles)) {
+      if (!file) continue;
+      used.add(String(file).trim());
+    }
+  }
+
   return [...used].filter(Boolean).sort();
 }
 

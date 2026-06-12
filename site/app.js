@@ -27,6 +27,7 @@
 
   const stage = document.getElementById("stage");
   const backgroundMusic = document.getElementById("backgroundMusic");
+  const sceneAudio = document.getElementById("sceneAudio");
   const choicePanel = document.getElementById("choicePanel");
   const choiceHint = document.getElementById("choiceHint");
   const leftBtn = document.getElementById("leftBtn");
@@ -146,6 +147,20 @@
     return state.activeMusic || defaultMusicCue();
   }
 
+  function sceneAudioSettings() {
+    const raw = state.story?.settings?.sceneAudio;
+    const files = raw?.files && typeof raw.files === "object" ? raw.files : {};
+    return {
+      volume: Number(raw?.volume ?? 0.32),
+      files
+    };
+  }
+
+  function sceneAudioFileForScene(sceneId) {
+    const files = sceneAudioSettings().files;
+    return String(files?.[sceneId] || "").trim();
+  }
+
   function ensureBackgroundMusicSource(file) {
     if (!backgroundMusic) return;
     const expectedFile = String(file || defaultMusicCue().file || "tragedyminimalism.mp3").trim() || "tragedyminimalism.mp3";
@@ -153,6 +168,17 @@
     if (backgroundMusic.src !== expected) {
       backgroundMusic.src = expected;
       backgroundMusic.load();
+    }
+  }
+
+  function ensureSceneAudioSource(file) {
+    if (!sceneAudio) return;
+    const expectedFile = String(file || "").trim();
+    if (!expectedFile) return;
+    const expected = new URL(`./audio/${expectedFile}`, window.location.href).href;
+    if (sceneAudio.src !== expected) {
+      sceneAudio.src = expected;
+      sceneAudio.load();
     }
   }
 
@@ -212,7 +238,16 @@
       S_NEW_25: null,
       S_NEW_26: null,
       S_NEW_27: null,
-      S_NEW_28: "neutral"
+      S_NEW_28: "neutral",
+      S_NEW_29: "dictator",
+      S_NEW_30: "neutral",
+      S_NEW_31: "citizen",
+      S_NEW_32: "neutral",
+      S_NEW_33: "citizen",
+      S_NEW_34: "neutral",
+      S_NEW_35: "dictator",
+      S_NEW_36: "neutral",
+      S_NEW_37: "citizen"
     };
 
     return bridgeLineMap[sceneId] ?? null;
@@ -482,6 +517,38 @@
     ensureBackgroundMusicPlaying();
   }
 
+  function stopSceneAudio() {
+    if (!sceneAudio) return;
+    sceneAudio.pause();
+    sceneAudio.removeAttribute("src");
+    sceneAudio.load();
+  }
+
+  function syncSceneAudio(sceneId, scene) {
+    if (!sceneAudio) return;
+    if (scene?.uiMode === "activation") {
+      stopSceneAudio();
+      return;
+    }
+
+    const file = sceneAudioFileForScene(sceneId);
+    if (!file) {
+      stopSceneAudio();
+      return;
+    }
+
+    ensureSceneAudioSource(file);
+    sceneAudio.currentTime = 0;
+    sceneAudio.volume = Math.max(0, Math.min(1, Number(sceneAudioSettings().volume ?? 0.32)));
+    sceneAudio.play()
+      .then(() => log("scene-audio-play", { scene: sceneId, track: file }))
+      .catch((err) => log("scene-audio-failed", {
+        scene: sceneId,
+        track: file,
+        reason: String(err?.message || err)
+      }));
+  }
+
   function applyMusicEnvelope() {
     if (!backgroundMusic) return;
     const music = activeMusicConfig();
@@ -729,6 +796,7 @@
       setChoiceState(false);
       setActivationState(Boolean(instantChoice), effectiveTarget);
       syncBackgroundMusic(effectiveTarget);
+      syncSceneAudio(resolvedTargetId, effectiveTarget);
 
       const shouldRevealChoicesImmediately = !instantChoice && (effectiveTarget?.left || effectiveTarget?.right);
       if (shouldRevealChoicesImmediately) {

@@ -35,7 +35,33 @@
       "Z_TIMEOUT_6",
       "Z_TIMEOUT_7"
     ],
+    "finalLoopInsertionIds": [
+      "Z_FINAL_1",
+      "Z_FINAL_2",
+      "Z_FINAL_3",
+      "Z_FINAL_4",
+      "Z_FINAL_5"
+    ],
     "__saveProbe": "2026-04-06T13:30:00Z",
+    "sceneAudio": {
+      "volume": 0.32,
+      "files": {
+        "C11": "C11.mp3",
+        "C2": "C2.mp3",
+        "C3": "C3.mp3",
+        "D3": "D3.mp3",
+        "F3": "f3.mp3",
+        "N1": "N1.mp3",
+        "S_NEW_13": "s_new_13.mp3",
+        "S_NEW_20": "s_new_20.mp3",
+        "S_NEW_4": "s_new_4.mp3",
+        "S_NEW_5": "s_new_5.mp3",
+        "S_NEW_6": "s_new_6.mp3",
+        "S_NEW_7": "s_new_7.mp3",
+        "S_NEW_8": "s_new_8.mp3",
+        "S_NEW_9": "s_new_9.mp3"
+      }
+    },
     "videoBaseUrl": "https://pub-4077e61cd3c3400ba4f8b9e50c320690.r2.dev/videos/"
   },
   "scenes": {
@@ -160,8 +186,8 @@
     "C4": {
       "title": "Красная дверь-поле",
       "video": "C4.mp4",
-      "left": "N3",
-      "right": "C6",
+      "left": "S_NEW_36",
+      "right": "S_NEW_37",
       "leftLabel": "остаться",
       "rightLabel": "открыть дверь"
     },
@@ -241,7 +267,7 @@
       "left": "S_NEW_18",
       "right": "S_NEW_17",
       "leftLabel": "надеть очки",
-      "rightLabel": "не надевает очки"
+      "rightLabel": "не надевать очки"
     },
     "N6": {
       "title": "Человек тащит мусор",
@@ -269,8 +295,8 @@
     "F0": {
       "title": "Финальная студия",
       "video": "F0.mp4",
-      "left": "F1",
-      "right": "F2",
+      "left": "S_NEW_35",
+      "right": "S_NEW_32",
       "variants": {
         "citizen": {
           "left": "F2",
@@ -284,15 +310,18 @@
     },
     "F1": {
       "title": "Концовка: диктатура",
-      "video": "F1.mp4"
+      "video": "F1.mp4",
+      "next": "__FINAL_LOOP_INSERT__"
     },
     "F2": {
       "title": "Концовка: нейтральная",
-      "video": "F2.mp4"
+      "video": "F2.mp4",
+      "next": "__FINAL_LOOP_INSERT__"
     },
     "F3": {
       "title": "Концовка: гражданин",
-      "video": "F3.mp4"
+      "video": "f3.mp4",
+      "next": "__FINAL_LOOP_INSERT__"
     },
     "S_NEW_1": {
       "video": "S_NEW_1.mp4",
@@ -302,8 +331,8 @@
     },
     "S_NEW_2": {
       "video": "S_NEW_2.mp4",
-      "left": "F2",
-      "right": "F3",
+      "left": "S_NEW_34",
+      "right": "S_NEW_33",
       "title": "финальная студия-ведущий",
       "leftLabel": "продолжить просмотр",
       "rightLabel": "выключить"
@@ -456,19 +485,66 @@
       "video": "z7.mp4",
       "next": "__RETRY_CHOICE__"
     },
+    "Z_FINAL_1": {
+      "title": "Финальная вставка 1",
+      "video": "p1.mp4",
+      "next": "S1"
+    },
+    "Z_FINAL_2": {
+      "title": "Финальная вставка 2",
+      "video": "p2.mp4",
+      "next": "S1"
+    },
+    "Z_FINAL_3": {
+      "title": "Финальная вставка 3",
+      "video": "p3.mp4",
+      "next": "S1"
+    },
+    "Z_FINAL_4": {
+      "title": "Финальная вставка 4",
+      "video": "p4.mp4",
+      "next": "S1"
+    },
+    "Z_FINAL_5": {
+      "title": "Финальная вставка 5",
+      "video": "p5.mp4",
+      "next": "S1"
+    },
     "S_NEW_29": {
       "next": "F0",
       "video": "S_NEW_29.mp4"
     },
     "S_NEW_30": {
-      "next": "F0"
+      "next": "F0",
+      "video": "S_NEW_30.mp4"
     },
     "S_NEW_31": {
-      "next": "S_NEW_2"
+      "next": "S_NEW_2",
+      "video": "S_NEW_31.mp4"
     },
-    "S_NEW_32": {},
-    "S_NEW_33": {},
-    "S_NEW_34": {}
+    "S_NEW_32": {
+      "next": "F2",
+      "video": "S_NEW_32.mp4"
+    },
+    "S_NEW_33": {
+      "next": "F3",
+      "video": "S_NEW_33.mp4"
+    },
+    "S_NEW_34": {
+      "next": "F2",
+      "video": "S_NEW_34.mp4"
+    },
+    "S_NEW_35": {
+      "next": "F1",
+      "video": "S_NEW_35.mp4"
+    },
+    "S_NEW_36": {
+      "next": "N3"
+    },
+    "S_NEW_37": {
+      "video": "S_NEW_37.mp4",
+      "next": "C6"
+    }
   },
   "layout": {
     "S01": {
@@ -544,8 +620,8 @@
       "y": 1411
     },
     "C4": {
-      "x": 2404,
-      "y": 1744
+      "x": 2275,
+      "y": 1748
     },
     "C6": {
       "x": 2739,
@@ -592,8 +668,8 @@
       "y": 40
     },
     "N8": {
-      "x": 4105,
-      "y": 659
+      "x": 3911,
+      "y": 624
     },
     "N10": {
       "x": 3521,
@@ -604,16 +680,16 @@
       "y": 353
     },
     "F1": {
-      "x": 4945,
+      "x": 5528,
       "y": 16
     },
     "F2": {
-      "x": 5090,
-      "y": 679
+      "x": 5832,
+      "y": 842
     },
     "F3": {
-      "x": 5091,
-      "y": 1349
+      "x": 5588,
+      "y": 1351
     },
     "S_NEW_1": {
       "x": 2931,
@@ -732,7 +808,7 @@
       "y": 1600
     },
     "Z_TIMEOUT_2": {
-      "x": 1220,
+      "x": 1356,
       "y": 1600
     },
     "Z_TIMEOUT_3": {
@@ -768,16 +844,48 @@
       "y": 1078
     },
     "S_NEW_32": {
-      "x": 5313,
-      "y": 73
+      "x": 5189,
+      "y": 455
     },
     "S_NEW_33": {
-      "x": 5512,
-      "y": 579
+      "x": 5019,
+      "y": 1318
     },
     "S_NEW_34": {
-      "x": 5461,
-      "y": 1378
+      "x": 5100,
+      "y": 807
+    },
+    "Z_FINAL_1": {
+      "x": 1110,
+      "y": 1944
+    },
+    "Z_FINAL_2": {
+      "x": 120,
+      "y": 1900
+    },
+    "Z_FINAL_3": {
+      "x": 340,
+      "y": 1900
+    },
+    "Z_FINAL_4": {
+      "x": 560,
+      "y": 1900
+    },
+    "Z_FINAL_5": {
+      "x": 780,
+      "y": 1900
+    },
+    "S_NEW_35": {
+      "x": 5097,
+      "y": 124
+    },
+    "S_NEW_36": {
+      "x": 2488,
+      "y": 1433
+    },
+    "S_NEW_37": {
+      "x": 2558,
+      "y": 2014
     }
   }
 }
