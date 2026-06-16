@@ -152,15 +152,23 @@
   function sceneAudioSettings() {
     const raw = state.story?.settings?.sceneAudio;
     const files = raw?.files && typeof raw.files === "object" ? raw.files : {};
+    const volumes = raw?.volumes && typeof raw.volumes === "object" ? raw.volumes : {};
     return {
       volume: Number(raw?.volume ?? 0.32),
-      files
+      files,
+      volumes
     };
   }
 
   function sceneAudioFileForScene(sceneId) {
     const files = sceneAudioSettings().files;
     return String(files?.[sceneId] || "").trim();
+  }
+
+  function sceneAudioVolumeForScene(sceneId) {
+    const audioSettings = sceneAudioSettings();
+    const sceneVolume = audioSettings.volumes?.[sceneId];
+    return Math.max(0, Math.min(1, Number(sceneVolume ?? audioSettings.volume ?? 0.32)));
   }
 
   function activationAudioSettings() {
@@ -630,7 +638,7 @@
 
     ensureSceneAudioSource(file);
     sceneAudio.currentTime = 0;
-    sceneAudio.volume = Math.max(0, Math.min(1, Number(sceneAudioSettings().volume ?? 0.32)));
+    sceneAudio.volume = sceneAudioVolumeForScene(sceneId);
     sceneAudio.play()
       .then(() => log("scene-audio-play", { scene: sceneId, track: file }))
       .catch((err) => log("scene-audio-failed", {

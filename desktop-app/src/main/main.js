@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const { buildScenarioOutline, outlinePathForStory } = require('./story-outline');
 
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+
 let win = null;
 let server = null;
 
