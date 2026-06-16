@@ -898,7 +898,7 @@
       setChoiceState(false);
       setActivationState(Boolean(instantChoice), effectiveTarget);
       syncBackgroundMusic(effectiveTarget);
-      syncSceneAudio(resolvedTargetId, effectiveTarget);
+      stopSceneAudio();
 
       const shouldRevealChoicesImmediately = !instantChoice && (effectiveTarget?.left || effectiveTarget?.right);
       if (shouldRevealChoicesImmediately) {
@@ -908,6 +908,9 @@
 
       const nextLayer = inactiveLayer();
       const { missing } = await startSceneOnLayer(nextLayer, resolvedTargetId);
+      if (!missing) {
+        syncSceneAudio(resolvedTargetId, effectiveTarget);
+      }
       if (shouldRevealChoicesImmediately) {
         nextLayer.revealHandled = true;
       }
