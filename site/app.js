@@ -569,15 +569,14 @@
     if (playPromise && typeof playPromise.catch === "function") {
       playPromise
         .then(() => {
-          const stillOnActivationScene = state.currentId === primedFromSceneId && sceneById(state.currentId)?.uiMode === "activation";
-          if (!stillOnActivationScene) {
-            log("music-prime-keep-playing", { track: music.file, scene: state.currentId || "-" });
-            return;
-          }
           backgroundMusic.pause();
           backgroundMusic.currentTime = Number(music.startAtSec || 0);
           backgroundMusic.volume = 0;
-          log("music-primed", { track: music.file });
+          log("music-primed", {
+            track: music.file,
+            from: primedFromSceneId,
+            scene: state.currentId || "-"
+          });
         })
         .catch((err) => log("music-prime-failed", { reason: String(err?.message || err) }));
     }
