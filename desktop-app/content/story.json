@@ -5,14 +5,24 @@
     "crossfadeMs": 0,
     "missingHoldMs": 900,
     "debugOverlay": false,
+    "activationAudio": {
+      "file": "activation-zastavka-loop.mp3",
+      "volume": 1,
+      "loop": true
+    },
+    "activationClickAudio": {
+      "file": "knopkasound.mp3",
+      "volume": 1
+    },
     "music": {
-      "file": "mainpartaudio.mp3",
+      "file": "tragedyminimalism.mp3",
       "startSceneId": "S_NEW_25",
       "startAtSec": 0,
       "fadeInSec": 10,
       "fadeOutStartSec": 0,
       "fadeOutDurationSec": 0,
       "volume": 0.79,
+      "loop": true,
       "cues": [
         {
           "file": "zastavkaaudio.mp3",
@@ -46,14 +56,38 @@
     "sceneAudio": {
       "volume": 0.32,
       "files": {
+        "C0": "C0.mp3",
+        "C1": "C1.mp3",
+        "C10": "C10.mp3",
         "C11": "C11.mp3",
         "C2": "C2.mp3",
         "C3": "C3.mp3",
+        "D0": "D0.mp3",
+        "D1": "D1.mp3",
         "D3": "D3.mp3",
+        "F1": "F1.mp3",
         "F3": "f3.mp3",
         "N1": "N1.mp3",
+        "S0": "S0.mp3",
+        "S1": "S1.mp3",
+        "S_NEW_10": "s_new_10.mp3",
+        "S_NEW_11": "s_new_11.mp3",
+        "S_NEW_12": "s_new_12.mp3",
         "S_NEW_13": "s_new_13.mp3",
+        "S_NEW_16": "s_new_16.mp3",
+        "S_NEW_17": "s_new_17.mp3",
+        "S_NEW_18": "s_new_18.mp3",
+        "S_NEW_19": "s_new_19.mp3",
         "S_NEW_20": "s_new_20.mp3",
+        "S_NEW_21": "s_new_21.mp3",
+        "S_NEW_22": "s_new_22.mp3",
+        "S_NEW_24": "s_new_24.mp3",
+        "S_NEW_27": "s_new_27.mp3",
+        "S_NEW_28": "s_new_28.mp3",
+        "S_NEW_29": "s_new_29.mp3",
+        "S_NEW_30": "s_new_30.mp3",
+        "S_NEW_31": "s_new_31.mp3",
+        "S_NEW_32": "s_new_32.mp3",
         "S_NEW_4": "s_new_4.mp3",
         "S_NEW_5": "s_new_5.mp3",
         "S_NEW_6": "s_new_6.mp3",
@@ -73,6 +107,7 @@
     "S0": {
       "title": "Заставка",
       "video": "S0.mp4",
+      "videoMuted": true,
       "next": "S1"
     },
     "S1": {
@@ -443,7 +478,8 @@
     },
     "S_NEW_27": {
       "next": "S0",
-      "video": "S_NEW_27.mp4"
+      "video": "S_NEW_27.mp4",
+      "videoMuted": true
     },
     "S_NEW_28": {
       "next": "N10",
@@ -538,11 +574,17 @@
       "video": "S_NEW_35.mp4"
     },
     "S_NEW_36": {
+      "video": "S_NEW_36.mp4",
       "next": "N3"
     },
     "S_NEW_37": {
       "video": "S_NEW_37.mp4",
       "next": "C6"
+    },
+    "S_NEW_38": {
+      "title": "Нейтральный предфинал",
+      "video": "S_NEW_38.mp4",
+      "next": "F2"
     }
   },
   "layout": {
@@ -853,6 +895,10 @@
     "S_NEW_34": {
       "x": 5100,
       "y": 807
+    },
+    "S_NEW_38": {
+      "x": 4810,
+      "y": 585
     },
     "Z_FINAL_1": {
       "x": 1110,

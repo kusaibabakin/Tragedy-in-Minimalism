@@ -28,6 +28,8 @@
   const stage = document.getElementById("stage");
   const backgroundMusic = document.getElementById("backgroundMusic");
   const sceneAudio = document.getElementById("sceneAudio");
+  const activationAudio = document.getElementById("activationAudio");
+  const activationClickAudio = document.getElementById("activationClickAudio");
   const choicePanel = document.getElementById("choicePanel");
   const choiceHint = document.getElementById("choiceHint");
   const leftBtn = document.getElementById("leftBtn");
@@ -161,6 +163,63 @@
     return String(files?.[sceneId] || "").trim();
   }
 
+  function activationAudioSettings() {
+    const raw = state.story?.settings?.activationAudio;
+    return {
+      file: String(raw?.file || "").trim(),
+      volume: Number(raw?.volume ?? 1),
+      loop: raw?.loop ?? true
+    };
+  }
+
+  function activationClickAudioSettings() {
+    const raw = state.story?.settings?.activationClickAudio;
+    return {
+      file: String(raw?.file || "").trim(),
+      volume: Number(raw?.volume ?? 1)
+    };
+  }
+
+  function ensureActivationAudioSource(file) {
+    if (!activationAudio) return;
+    const expectedFile = String(file || "").trim();
+    if (!expectedFile) return;
+    const expected = new URL(`./audio/${expectedFile}`, window.location.href).href;
+    if (activationAudio.src !== expected) {
+      activationAudio.src = expected;
+      activationAudio.load();
+    }
+  }
+
+  function ensureActivationClickAudioSource(file) {
+    if (!activationClickAudio) return;
+    const expectedFile = String(file || "").trim();
+    if (!expectedFile) return;
+    const expected = new URL(`./audio/${expectedFile}`, window.location.href).href;
+    if (activationClickAudio.src !== expected) {
+      activationClickAudio.src = expected;
+      activationClickAudio.load();
+    }
+  }
+
+  function playActivationClickAudio() {
+    if (!activationClickAudio) return;
+    const clickAudio = activationClickAudioSettings();
+    if (!clickAudio.file) return;
+    ensureActivationClickAudioSource(clickAudio.file);
+    activationClickAudio.currentTime = 0;
+    activationClickAudio.volume = Math.max(0, Math.min(1, Number(clickAudio.volume ?? 1)));
+    activationClickAudio.play()
+      .then(() => log("activation-click-audio-play", { track: clickAudio.file }))
+      .catch((err) => log("activation-click-audio-failed", { reason: String(err?.message || err) }));
+  }
+
+  function stopActivationAudio() {
+    if (!activationAudio) return;
+    activationAudio.pause();
+    activationAudio.currentTime = 0;
+  }
+
   function ensureBackgroundMusicSource(file) {
     if (!backgroundMusic) return;
     const expectedFile = String(file || defaultMusicCue().file || "tragedyminimalism.mp3").trim() || "tragedyminimalism.mp3";
@@ -266,6 +325,18 @@
     });
   }
 
+  function resetChoiceStats(reason) {
+    state.choiceStats.dictator = 0;
+    state.choiceStats.citizen = 0;
+    state.choiceStats.neutral = 0;
+    log("choice-stats-reset", { reason });
+  }
+
+  function isFinalLoopInsertionScene(sceneId) {
+    const ids = Array.isArray(settings().finalLoopInsertionIds) ? settings().finalLoopInsertionIds : [];
+    return ids.includes(sceneId);
+  }
+
   function finalHubForChoiceBalance() {
     const dictator = Number(state.choiceStats.dictator || 0);
     const citizen = Number(state.choiceStats.citizen || 0);
@@ -274,7 +345,12 @@
     const polarityTotal = dictator + citizen;
     const dictatorPercent = polarityTotal > 0 ? (dictator / polarityTotal) * 100 : 50;
     const citizenPercent = polarityTotal > 0 ? (citizen / polarityTotal) * 100 : 50;
-    const hub = citizenPercent > dictatorPercent ? "S_NEW_2" : "F0";
+    let hub = "F0";
+    if (neutral > dictator && neutral > citizen) {
+      hub = "S_NEW_38";
+    } else if (citizenPercent > dictatorPercent) {
+      hub = "S_NEW_2";
+    }
 
     log("final-hub-selected", {
       hub,
@@ -290,7 +366,7 @@
   }
 
   function resolveFinalHubTarget(targetId) {
-    if (targetId !== "F0" && targetId !== "S_NEW_2") return targetId;
+    if (targetId !== "F0" && targetId !== "S_NEW_2" && targetId !== "S_NEW_38") return targetId;
     return finalHubForChoiceBalance();
   }
 
@@ -367,6 +443,7 @@
 
   function resetVideoElement(video) {
     video.pause();
+    video.muted = false;
     video.removeAttribute("src");
     video.load();
     video.currentTime = 0;
@@ -423,6 +500,7 @@
 
   function setActivationState(enabled, scene) {
     activationScreen.hidden = !enabled;
+    const activationMusic = activationAudioSettings();
     if (activationBackdropVideo) {
       ensureActivationBackdropSource();
       if (enabled) {
@@ -431,6 +509,19 @@
       } else {
         activationBackdropVideo.pause();
         activationBackdropVideo.currentTime = 0;
+      }
+    }
+    if (activationAudio) {
+      if (enabled && activationMusic.file) {
+        ensureActivationAudioSource(activationMusic.file);
+        activationAudio.loop = activationMusic.loop !== false;
+        activationAudio.volume = Math.max(0, Math.min(1, Number(activationMusic.volume ?? 1)));
+        activationAudio.currentTime = 0;
+        activationAudio.play()
+          .then(() => log("activation-audio-play", { track: activationMusic.file }))
+          .catch((err) => log("activation-audio-failed", { reason: String(err?.message || err) }));
+      } else {
+        stopActivationAudio();
       }
     }
     if (!enabled) return;
@@ -750,6 +841,7 @@
     setMissingMode(layer, false, sceneId);
     resetVideoElement(layer.video);
     layer.sceneId = sceneId;
+    layer.video.muted = scene.videoMuted === true;
     layer.video.src = src;
     layer.video.load();
 
@@ -786,6 +878,9 @@
       }
 
       const fromId = state.currentId;
+      if (resolvedTargetId === "S1" && isFinalLoopInsertionScene(fromId)) {
+        resetChoiceStats("new-run-after-final-loop");
+      }
       state.previousId = fromId;
       state.currentId = resolvedTargetId;
       state.sceneEnded = false;
@@ -837,6 +932,8 @@
     leftBtn.addEventListener("click", () => chooseTarget("left"));
     rightBtn.addEventListener("click", () => chooseTarget("right"));
     activationBtn.addEventListener("click", () => {
+      playActivationClickAudio();
+      stopActivationAudio();
       primeBackgroundMusicFromGesture(sceneById(state.currentId)?.left);
       chooseTarget("left");
     });

@@ -58,6 +58,14 @@ function loadRootStory() {
 function collectUsedAudioFiles(story) {
   const used = new Set();
   const music = story?.settings?.music;
+  const activationAudio = story?.settings?.activationAudio;
+  const activationClickAudio = story?.settings?.activationClickAudio;
+  if (activationAudio?.file) {
+    used.add(String(activationAudio.file).trim());
+  }
+  if (activationClickAudio?.file) {
+    used.add(String(activationClickAudio.file).trim());
+  }
   if (music?.file) {
     used.add(String(music.file).trim());
   }
